@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: var(--font-manrope), sans-serif;
+}
+
+@layer base {
+  html {
+    overflow-x: hidden; /* Prevent horizontal scrollbars */
+  }
+  body {
+    @apply bg-background text-foreground;
+    min-width: 320px; /* Ensure a minimum width for very small viewports */
+    overflow-x: hidden; /* Apply to body as well for safety */
+    background-image: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
+    background-repeat: repeat;
+    background-attachment: fixed;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  :root {
+    --background: 210 33% 96%; /* #F0F4F8 Light Grey */
+    --foreground: 210 15% 25%; /* Dark Grey for text */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 210 15% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 15% 25%;
+
+    --primary: 207 70% 50%; /* Darker Soft Blue for buttons */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+
+    --secondary: 210 25% 90%; /* Slightly darker grey */
+    --secondary-foreground: 210 15% 25%;
+
+    --muted: 210 25% 90%;
+    --muted-foreground: 210 10% 45%; /* Lighter grey for muted text */
+
+    --accent: 33 100% 65%; /* #FFB74D Orange */
+    --accent-foreground: 33 50% 20%; /* Dark brown/orange for text on accent */
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 85%;
+    --input: 0 0% 100%; /* White input background */
+    --ring: 207 88% 68%; /* Original Soft Blue for focus ring */
+
+    --radius: 0.5rem;
+
+    /* Sidebar variables (can keep defaults or adjust if sidebar is used) */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 210 15% 15%; /* Dark background for dark mode */
+    --foreground: 210 20% 90%; /* Light text for dark mode */
+
+    --card: 210 15% 20%;
+    --card-foreground: 210 20% 90%;
+
+    --popover: 210 15% 20%;
+    --popover-foreground: 210 20% 90%;
+
+    --primary: 207 80% 60%; /* Soft Blue for dark mode */
+    --primary-foreground: 207 80% 10%;
+
+    --secondary: 210 15% 25%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 210 15% 25%;
+    --muted-foreground: 210 15% 60%;
+
+    --accent: 33 100% 70%; /* Orange for dark mode */
+    --accent-foreground: 33 100% 15%;
+
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 15% 30%;
+    --input: 210 15% 25%;
+    --ring: 207 80% 60%;
+    
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  /* body already styled above with overflow-x: hidden */
+}
