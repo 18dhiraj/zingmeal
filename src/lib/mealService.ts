@@ -1,9 +1,6 @@
-
 import type { Meal, MealFilters } from '@/types';
-import { sampleMeals } from './mockData';
-
-// Simulate API delay
-const DUMMY_API_DELAY = 700; 
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase"; // Make sure your Firestore instance is initialized here
 
 const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
   if (meal.price < filters.minPrice || meal.price > filters.maxPrice) {
@@ -20,88 +17,67 @@ const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
   return true;
 };
 
-export const fetchMeals = async (filters: MealFilters): Promise<Meal[] | null> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const { mealsPerDay } = filters;
-      let availableMeals = sampleMeals.filter(meal => satisfiesFilters(meal, filters));
-
-      if (availableMeals.length === 0) {
-        resolve(null);
-        return;
-      }
-      
-      availableMeals.sort(() => 0.5 - Math.random()); // Shuffle for variety
-      
-      const selectedMeals: Meal[] = [];
-      const usedMealIds = new Set<string>();
-
-      for (const meal of availableMeals) {
-        if (selectedMeals.length >= mealsPerDay) {
-          break;
-        }
-        if (!usedMealIds.has(meal.id)) {
-          selectedMeals.push(meal);
-          usedMealIds.add(meal.id);
-        }
-      }
-      
-      resolve(selectedMeals.length > 0 ? selectedMeals : null);
-    }, DUMMY_API_DELAY);
+const getAllMeals = async (): Promise<Meal[]> => {
+  const querySnapshot = await getDocs(collection(db, "meals"));
+  const meals: Meal[] = [];
+  querySnapshot.forEach(doc => {
+    meals.push({ id: doc.id, ...doc.data() } as Meal);
   });
+  return meals;
+};
+
+export const fetchMeals = async (filters: MealFilters): Promise<Meal[] | null> => {
+  const allMeals = await getAllMeals();
+  let availableMeals = allMeals.filter(meal => satisfiesFilters(meal, filters));
+
+  if (availableMeals.length === 0) {
+    return null;
+  }
+
+  availableMeals.sort(() => 0.5 - Math.random());
+
+  const selectedMeals: Meal[] = [];
+  const usedMealIds = new Set<string>();
+
+  for (const meal of availableMeals) {
+    if (selectedMeals.length >= filters.mealsPerDay) break;
+    if (!usedMealIds.has(meal.id)) {
+      selectedMeals.push(meal);
+      usedMealIds.add(meal.id);
+    }
+  }
+
+  return selectedMeals.length > 0 ? selectedMeals : null;
 };
 
 export const fetchNextMeal = async (
-  filters: MealFilters, 
-  currentMealId?: string, 
+  filters: MealFilters,
+  currentMealId?: string,
   excludeMealIds: string[] = []
 ): Promise<Meal | null> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let potentialMeals = sampleMeals.filter(meal => satisfiesFilters(meal, filters));
-      
-      const allExcludedIds = new Set(excludeMealIds);
-      if (currentMealId) {
-        allExcludedIds.add(currentMealId);
-      }
-      
-      potentialMeals = potentialMeals.filter(meal => !allExcludedIds.has(meal.id));
-      
-      potentialMeals.sort(() => 0.5 - Math.random()); // Shuffle
+  const allMeals = await getAllMeals();
+  let potentialMeals = allMeals.filter(meal => satisfiesFilters(meal, filters));
 
-      if (potentialMeals.length > 0) {
-        resolve(potentialMeals[0]);
-      } else {
-        resolve(null);
-      }
-    }, DUMMY_API_DELAY / 2);
-  });
+  const allExcludedIds = new Set(excludeMealIds);
+  if (currentMealId) {
+    allExcludedIds.add(currentMealId);
+  }
+
+  potentialMeals = potentialMeals.filter(meal => !allExcludedIds.has(meal.id));
+  potentialMeals.sort(() => 0.5 - Math.random());
+
+  return potentialMeals.length > 0 ? potentialMeals[0] : null;
 };
 
-
 export const fetchMealById = async (id: string): Promise<Meal | null> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const meal = sampleMeals.find(m => m.id === id);
-      resolve(meal || null);
-    }, DUMMY_API_DELAY / 3); 
-  });
+  const allMeals = await getAllMeals();
+  return allMeals.find(m => m.id === id) || null;
 };
 
 export const fetchMealsByIds = async (ids: string[]): Promise<Meal[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const mealsMap = new Map<string, Meal>();
-      sampleMeals.forEach(m => mealsMap.set(m.id, m));
-      
-      const resultMeals: Meal[] = [];
-      ids.forEach(id => {
-        const meal = mealsMap.get(id);
-        if (meal) {
-          resultMeals.push(meal);
-        }
-      });
-      resolve(resultMeals);
-    }, DUMMY_API_DELAY / 2);
-  });
+  const allMeals = await getAllMeals();
+  const mealMap = new Map<string, Meal>();
+  allMeals.forEach(m => mealMap.set(m.id, m));
+
+  return ids.map(id => mealMap.get(id)).filter((m): m is Meal => !!m);
 };
