@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -11,23 +10,29 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { DietaryPreference, MealFilters } from '@/types';
-import { Leaf, Vegan, WheatOff, MilkOff, Ban, Utensils, DollarSign, Beef } from 'lucide-react';
+import { Utensils, DollarSign, Beef } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const dietaryOptions: DietaryPreference[] = [
-  { id: 'vegetarian', label: 'Vegetarian', icon: Leaf },
-  { id: 'vegan', label: 'Vegan', icon: Vegan },
-  { id: 'gluten-free', label: 'Gluten-Free', icon: WheatOff },
-  { id: 'dairy-free', label: 'Dairy-Free', icon: MilkOff },
-  { id: 'nut-free', label: 'Nut-Free', icon: Ban },
-];
+const normalize = (str: string) => str.trim().toLowerCase().replace(/\s+/g, '-');
+
+const dietaryTagsEnv = process.env.NEXT_PUBLIC_DIETARY_TAGS || '';
+const dietaryTagsFromEnv = dietaryTagsEnv
+  .split(',')
+  .map(tag => tag.trim())
+  .filter(Boolean);
+
+// Ensure 'normalize(label)' returns a value compatible with 'DietaryPreferenceValue'
+const dietaryOptions: DietaryPreference[] = dietaryTagsFromEnv.map(label => ({
+  id: normalize(label) as DietaryPreference['id'],
+  label,
+}));
 
 const mealsPerDayOptions = [
-    { value: "1", label: "1 Meal" },
-    { value: "2", label: "2 Meals" },
-    { value: "3", label: "3 Meals" },
-    { value: "4", label: "4 Meals" },
-    { value: "5", label: "5 Meals" },
+  { value: "1", label: "1 Meal" },
+  { value: "2", label: "2 Meals" },
+  { value: "3", label: "3 Meals" },
+  { value: "4", label: "4 Meals" },
+  { value: "5", label: "5 Meals" },
 ];
 
 const formSchema = z.object({
@@ -35,14 +40,13 @@ const formSchema = z.object({
     .refine(data => data[0] >= 5 && data[1] <= 100, {
       message: "Price must be between $5 and $100.",
     })
-    .refine(data => data[0] <= data[1], { // Ensure min is not greater than max
+    .refine(data => data[0] <= data[1], {
       message: "Min price cannot be greater than max price.",
-      path: ["priceRange"], // Apply error to the whole field
+      path: ["priceRange"],
     }),
   dietaryPreferences: z.array(z.string()).default([]),
   mealsPerDay: z.coerce.number().min(1).max(5).default(1),
 });
-
 
 type MealFinderFormValues = z.infer<typeof formSchema>;
 
@@ -71,9 +75,6 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
     onSubmit(mealFiltersSubmit);
   };
 
-  // Watch priceRange to display current values
-  // const priceRangeValue = form.watch("priceRange");
-
   return (
     <>
       <h2 className="text-3xl font-headline text-center flex items-center justify-center gap-2 mb-8 text-primary">
@@ -92,27 +93,25 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                 <div className="flex items-center space-x-4">
                   <DollarSign className="h-5 w-5 text-muted-foreground" />
                   <FormControl>
-                     <Slider
+                    <Slider
                       min={5}
                       max={100}
                       step={1}
-                      value={field.value} // Use value for controlled component
+                      value={field.value}
                       onValueChange={field.onChange}
                       className="w-full"
                       aria-label="Price range slider"
                     />
                   </FormControl>
-                   <span className="text-lg font-semibold text-primary w-32 text-right">
+                  <span className="text-lg font-semibold text-primary w-32 text-right">
                     ${field.value[0]} - ${field.value[1]}
                   </span>
                 </div>
                 <FormDescription>Set the minimum and maximum price per meal.</FormDescription>
-                <FormMessage /> {/* This will display errors related to priceRange, including the custom refine message */}
+                <FormMessage />
               </FormItem>
             )}
           />
-          {/* Removed specific error display for priceRange here as FormMessage above handles it */}
-
 
           <FormItem>
             <FormLabel className="text-lg font-medium">Dietary Preferences</FormLabel>
@@ -128,21 +127,20 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                       <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-3 bg-muted/30 rounded-md border border-input hover:bg-muted/50 transition-colors">
                         <FormControl>
                           <Checkbox
-                            checked={field.value?.includes(option.id)}
+                            checked={field.value?.includes(option.label)}
                             onCheckedChange={(checked) => {
                               return checked
-                                ? field.onChange([...field.value, option.id])
+                                ? field.onChange([...field.value, option.label])
                                 : field.onChange(
-                                    field.value?.filter(
-                                      (value) => value !== option.id
-                                    )
-                                  );
+                                  field.value?.filter(
+                                    (value) => value !== option.label
+                                  )
+                                );
                             }}
                             aria-label={option.label}
                           />
                         </FormControl>
                         <FormLabel className="font-normal flex items-center gap-2 cursor-pointer text-sm">
-                          <option.icon className="w-5 h-5 text-primary" />
                           {option.label}
                         </FormLabel>
                       </FormItem>
@@ -164,14 +162,14 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                 <FormControl>
                   <RadioGroup
                     onValueChange={(value) => field.onChange(parseInt(value, 10))}
-                    defaultValue={String(field.value)} // defaultValue is fine for RadioGroup with RHF if onChange is used.
-                    value={String(field.value)} // Ensure value is also passed for controlled behavior
+                    defaultValue={String(field.value)}
+                    value={String(field.value)}
                     className="flex flex-wrap gap-3"
                   >
                     {mealsPerDayOptions.map((option) => (
                       <FormItem key={option.value} className="flex items-center space-x-0 space-y-0">
                         <FormControl>
-                           <RadioGroupItem value={option.value} id={`mealsPerDay-${option.value}`} className="sr-only peer" />
+                          <RadioGroupItem value={option.value} id={`mealsPerDay-${option.value}`} className="sr-only peer" />
                         </FormControl>
                         <FormLabel
                           htmlFor={`mealsPerDay-${option.value}`}

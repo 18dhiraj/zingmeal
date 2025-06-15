@@ -4,7 +4,7 @@ export type DietaryPreferenceValue = 'vegetarian' | 'vegan' | 'gluten-free' | 'd
 export interface DietaryPreference {
   id: DietaryPreferenceValue;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
 }
 
 export interface Meal {
