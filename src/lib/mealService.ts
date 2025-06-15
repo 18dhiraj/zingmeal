@@ -20,11 +20,20 @@ const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
 const getAllMeals = async (): Promise<Meal[]> => {
   const querySnapshot = await getDocs(collection(db, "meals"));
   const meals: Meal[] = [];
+
   querySnapshot.forEach(doc => {
-    meals.push({ id: doc.id, ...doc.data() } as Meal);
+    const data = doc.data();
+
+    if (data.status === 1) {
+      const { id: _ignored, ...rest } = data;
+      meals.push({ id: doc.id, ...rest } as Meal);
+    }
   });
+
   return meals;
 };
+
+
 
 export const fetchMeals = async (filters: MealFilters): Promise<Meal[] | null> => {
   const allMeals = await getAllMeals();

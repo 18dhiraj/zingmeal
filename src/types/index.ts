@@ -11,15 +11,19 @@ export interface Meal {
   id: string;
   name: string;
   description: string;
-  price: number; // Actual price
-  dietaryTags: DietaryPreferenceValue[];
+  price: number;
   imageUrl: string;
-  calories?: number;
-  prepTime?: string; // e.g., "15 mins"
+  imagePath?: string;
+  dietaryTags: string[];
+  calories: number;
+  prepTime: string;
   ingredients: string[];
   steps: string[];
-  html?: string; // Optional field for custom HTML recipe
+  status: number; // <-- Add this if it's missing
+  createdAt?: any;
+  updatedAt?: any;
 }
+
 
 export interface MealFilters {
   minPrice: number;
