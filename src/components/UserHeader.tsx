@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { auth } from '@/firebase';
 import { useRouter } from "next/navigation";
-import { Calendar } from 'lucide-react'
+import { useIsMobile } from '../hooks/use-mobile'; // adjust path based on project
 
 export default function UserHeader() {
   const [user, setUser] = useState<User | null>(null);
-
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -22,41 +22,45 @@ export default function UserHeader() {
   const logout = async () => {
     router.push("/");
     await signOut(auth);
-  }
+  };
 
   if (!user) {
     return (
-      <>
-        <Link href={user ? "/weekly-plan" : "/login"} passHref>
-          <Button variant="outline" size="default">
-            <Calendar className="mr-2 h-5 w-5" />
-            Weekly plan
+      <div className="flex items-center gap-2">
+        <Link href="/login" passHref>
+          <Button variant="ghost" size={isMobile ? "icon" : "sm"}>
+            <Calendar className="h-5 w-5" />
+            {!isMobile && <span className="ml-2">Weekly Plan</span>}
           </Button>
         </Link>
         <Link href="/login" passHref>
-          <Button variant="default" size="sm">
-            <LogIn className="mr-2 h-4 w-4" />
-            Login
+          <Button variant="ghost" size={isMobile ? "icon" : "sm"}>
+            <LogIn className="h-5 w-5" />
+            {!isMobile && <span className="ml-2">Login</span>}
           </Button>
         </Link>
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <Link href={user ? "/weekly-plan" : "/login"} passHref>
-        <Button variant="outline" size="default">
-          <Calendar className="mr-2 h-5 w-5" />
-          Weekly Meal Plan
+    <div className="flex items-center gap-2">
+      <Link href="/weekly-plan" passHref>
+        <Button variant="ghost" size={isMobile ? "icon" : "sm"}>
+          <Calendar className="h-5 w-5" />
+          {!isMobile && <span className="ml-2">Weekly Plan</span>}
         </Button>
       </Link>
-      <span className="text-sm text-muted-foreground truncate max-w-[150px] hidden sm:inline-block">
-        {user.displayName || user.email}
-      </span>
-      <Button variant="ghost" size="icon" onClick={logout} title="Log out">
+
+      {!isMobile && (
+        <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+          {user.displayName || user.email}
+        </span>
+      )}
+
+      <Button variant="ghost" size="icon" onClick={logout} title="Logout">
         <LogOut className="h-5 w-5" />
       </Button>
-    </div >
+    </div>
   );
 }

@@ -20,23 +20,39 @@ export default function RootLayout({
   const header = (
     <header className="bg-card shadow-sm sticky top-0 z-40 border-b">
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
+        {/* Logo / Home Button */}
         <Link href="/" passHref>
-          <Button variant="ghost" className="text-xl font-bold text-primary hover:bg-transparent px-2 sm:px-3">
-            <ChefHat className="mr-2 h-6 w-6" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xl font-bold text-primary hover:bg-transparent px-2 sm:px-3 flex items-center gap-2"
+          >
+            <ChefHat className="h-6 w-6" />
             <span className="hidden sm:inline">ZingMeal</span>
           </Button>
         </Link>
-        <div className="flex items-center gap-4">
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link href="/favorites" passHref>
-            <Button variant="outline" size="default">
-              <Bookmark className="mr-2 h-5 w-5" />
-              My Favorites
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-2 sm:px-3"
+              title="Favorites"
+            >
+              <Bookmark className="h-5 w-5" />
+              <span className="hidden sm:inline">My Favorites</span>
             </Button>
           </Link>
+
+
+          {/* User Section */}
           <UserHeader />
         </div>
       </nav>
     </header>
+
   );
 
   return (

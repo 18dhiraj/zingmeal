@@ -4,7 +4,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ChefHat, Bookmark, LogOut, Calendar } from "lucide-react";
+import { ChefHat, Bookmark, LogOut, Calendar, User as Avatar } from "lucide-react";
 import Image from "next/image";
 import { PopularMeals } from '../components/PopularMeals';
 import { auth } from "@/firebase";
@@ -35,54 +35,62 @@ export default function HomePage() {
     return (
         <main className="flex flex-col min-h-screen">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-black/10 backdrop-blur-[1px] text-white px-6 sm:px-12 py-3 flex justify-between items-center shadow-sm">
-                <div className="flex items-center gap-2">
-                    <ChefHat className="w-6 h-6 text-white" />
-                    <span className="text-xl font-semibold tracking-wide">ZingMeal</span>
-                </div>
+            <header className="sticky top-0 z-50 bg-black/10 backdrop-blur-[1px] text-white px-4 sm:px-6 py-3 shadow-sm">
+                <div className="flex flex-wrap justify-between items-center gap-y-2">
+                    {/* Logo Section */}
+                    <div className="flex items-center gap-2">
+                        <ChefHat className="w-6 h-6 text-white" />
+                        <span className="text-xl font-semibold tracking-wide">ZingMeal</span>
+                    </div>
 
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push("/favorites")}
-                        className="text-white hover:bg-white/40 border border-white/30"
-                    >
-                        <Bookmark className="h-4 w-4 mr-1" />
-                        Favorites
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        onClick={() => user ? router.push("/weekly-plan") : router.push("/login")}
-                        size="sm"
-                        className="text-white hover:bg-white/40 border border-white/30"
-                    >
-                        <Calendar className="h-4 w-4 mr-1" />
-                        Weekly Meal Plan
-                    </Button>
-
-                    {user ? (
-                        <>
-                            <span className="text-sm text-white">{user.displayName || user.email}</span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleLogout}
-                                className="text-white hover:bg-white/40 "
-                            >
-                                <LogOut className="h-4 w-4" />
-                            </Button>
-                        </>
-                    ) : (
+                    {/* Right Controls */}
+                    <div className="flex flex-wrap items-center gap-2 justify-end w-auto sm:w-auto">
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => router.push("/login")}
-                            className="text-white hover:bg-white/40 border border-white/30"
+                            onClick={() => router.push("/favorites")}
+                            className="text-white hover:bg-white/40 border border-white/30 flex items-center gap-1"
                         >
-                            Login
+                            <Bookmark className="h-5 w-5" />
+                            <span className="hidden sm:inline">Favorites</span>
                         </Button>
-                    )}
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => user ? router.push("/weekly-plan") : router.push("/login")}
+                            className="text-white hover:bg-white/40 border border-white/30 flex items-center gap-1"
+                        >
+                            <Calendar className="h-5 w-5" />
+                            <span className="hidden sm:inline">Weekly Plan</span>
+                        </Button>
+
+                        {user ? (
+                            <>
+                                <span className="hidden sm:inline text-sm text-white truncate max-w-[120px]">
+                                    {user.displayName || user.email}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleLogout}
+                                    className="text-white hover:bg-white/40 flex items-center"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                </Button>
+                            </>
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => router.push("/login")}
+                                className="text-white hover:bg-white/40 border border-white/30 flex items-center gap-1"
+                            >
+                                <Avatar className="h-5 w-5" />
+                                <span className="hidden sm:inline">Login</span>
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </header>
 
