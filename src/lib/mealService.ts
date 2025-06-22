@@ -1,5 +1,6 @@
 import type { Meal, MealFilters } from '@/types';
-import { collection, getDocs, limit, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, limit, query, orderBy, where, doc, setDoc, getDoc } from "firebase/firestore";
+import { getAuth } from 'firebase/auth';
 import { db } from "../firebase"; // Make sure your Firestore instance is initialized here
 
 const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
@@ -19,7 +20,12 @@ const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
 
 export const fetchNewMeals = async (): Promise<Meal[]> => {
   const mealsRef = collection(db, 'meals');
-  const q = query(mealsRef, orderBy('createdAt', 'desc'), limit(6));
+  const q = query(
+    mealsRef,
+    where('status', '==', 1),
+    orderBy('createdAt', 'desc'),
+    limit(6)
+  );
 
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Meal));
@@ -41,7 +47,52 @@ const getAllMeals = async (): Promise<Meal[]> => {
   return meals;
 };
 
+export const saveWeeklyPlan = async (mealPlan: Record<string, Record<string, string>>) => {
+  const auth = getAuth();
+  const user = auth.currentUser;
 
+  if (!user) throw new Error("User not logged in");
+
+  const userRef = doc(db, "users", user.uid, "weeklyPlans", "current");
+
+  await setDoc(userRef, {
+    createdAt: new Date(),
+    plan: mealPlan,
+  });
+
+  return true;
+};
+
+export async function getMeals(): Promise<Meal[]> {
+  try {
+    const q = query(collection(db, "meals"), where("status", "==", 1));
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Meal[];
+  } catch (error) {
+    console.error("Error fetching meals:", error);
+    return [];
+  }
+}
+
+export const getWeeklyPlan = async (): Promise<Record<string, Record<string, string>> | null> => {
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  if (!user) throw new Error("User not logged in");
+
+  const planRef = doc(db, "users", user.uid, "weeklyPlans", "current");
+  const planSnap = await getDoc(planRef);
+
+  if (planSnap.exists()) {
+    return planSnap.data().plan || null;
+  } else {
+    return null;
+  }
+};
 
 export const fetchMeals = async (filters: MealFilters): Promise<Meal[] | null> => {
   const allMeals = await getAllMeals();
