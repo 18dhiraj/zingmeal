@@ -7,6 +7,7 @@ import { LogIn, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { auth } from '@/firebase';
 import { useRouter } from "next/navigation";
+import { Calendar } from 'lucide-react'
 
 export default function UserHeader() {
   const [user, setUser] = useState<User | null>(null);
@@ -25,23 +26,37 @@ export default function UserHeader() {
 
   if (!user) {
     return (
-      <Link href="/login" passHref>
-        <Button variant="default" size="sm">
-          <LogIn className="mr-2 h-4 w-4" />
-          Login
-        </Button>
-      </Link>
+      <>
+        <Link href={user ? "/weekly-plan" : "/login"} passHref>
+          <Button variant="outline" size="default">
+            <Calendar className="mr-2 h-5 w-5" />
+            Weekly plan
+          </Button>
+        </Link>
+        <Link href="/login" passHref>
+          <Button variant="default" size="sm">
+            <LogIn className="mr-2 h-4 w-4" />
+            Login
+          </Button>
+        </Link>
+      </>
     );
   }
 
   return (
     <div className="flex items-center gap-3">
+      <Link href={user ? "/weekly-plan" : "/login"} passHref>
+        <Button variant="outline" size="default">
+          <Calendar className="mr-2 h-5 w-5" />
+          Weekly Meal Plan
+        </Button>
+      </Link>
       <span className="text-sm text-muted-foreground truncate max-w-[150px] hidden sm:inline-block">
         {user.displayName || user.email}
       </span>
       <Button variant="ghost" size="icon" onClick={logout} title="Log out">
         <LogOut className="h-5 w-5" />
       </Button>
-    </div>
+    </div >
   );
 }

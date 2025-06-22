@@ -4,7 +4,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ChefHat, Bookmark, LogOut } from "lucide-react";
+import { ChefHat, Bookmark, LogOut, Calendar } from "lucide-react";
 import Image from "next/image";
 import { PopularMeals } from '../components/PopularMeals';
 import { auth } from "@/firebase";
@@ -51,6 +51,15 @@ export default function HomePage() {
                         <Bookmark className="h-4 w-4 mr-1" />
                         Favorites
                     </Button>
+                    <Button
+                        variant="ghost"
+                        onClick={() => user ? router.push("/weekly-plan") : router.push("/login")}
+                        size="sm"
+                        className="text-white hover:bg-white/40 border border-white/30"
+                    >
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Weekly Meal Plan
+                    </Button>
 
                     {user ? (
                         <>
@@ -87,7 +96,7 @@ export default function HomePage() {
                     className="object-cover z-0"
                 />
                 <div className="absolute inset-0 bg-black/20 z-10" />
-                <div className="absolute inset-0 flex items-center justify-end z-20 px-6 sm:px-24">
+                <div className="absolute inset-0 flex items-center justify-end z-20 px-6 sm:px-48">
                     <div className="bg-black/20 backdrop-blur-[1px] border border-white/20 p-8 rounded-2xl max-w-md w-full text-left shadow-xl space-y-6">
                         <div className="flex items-center gap-3">
                             <ChefHat className="w-8 h-8 text-white" />
