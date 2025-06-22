@@ -8,7 +8,7 @@ body {
 
 @layer base {
   html {
-    overflow-x: hidden; /* Prevent horizontal scrollbars */
+    /* overflow-x: hidden; Prevent horizontal scrollbars */
   }
   body {
     @apply bg-background text-foreground;
@@ -16,7 +16,7 @@ body {
     overflow-x: hidden; /* Apply to body as well for safety */
     background-image: url('https://www.transparenttextures.com/patterns/subtle-white-feathers.png');
     background-repeat: repeat;
-    background-attachment: fixed;
+    /* background-attachment: fixed; */
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 

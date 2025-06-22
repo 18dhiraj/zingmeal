@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { DietaryPreference, MealFilters } from '@/types';
-import { Utensils, DollarSign, Beef } from 'lucide-react';
+import { Utensils, IndianRupee , Beef } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const normalize = (str: string) => str.trim().toLowerCase().replace(/\s+/g, '-');
@@ -38,7 +38,7 @@ const mealsPerDayOptions = [
 const formSchema = z.object({
   priceRange: z.array(z.number()).length(2).default([5, 50])
     .refine(data => data[0] >= 5 && data[1] <= 100, {
-      message: "Price must be between $5 and $100.",
+      message: "Price must be between ₹5 and ₹100.",
     })
     .refine(data => data[0] <= data[1], {
       message: "Min price cannot be greater than max price.",
@@ -91,7 +91,7 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
               <FormItem>
                 <FormLabel className="text-lg font-medium">Price Range</FormLabel>
                 <div className="flex items-center space-x-4">
-                  <DollarSign className="h-5 w-5 text-muted-foreground" />
+                  <IndianRupee  className="h-5 w-5 text-muted-foreground" />
                   <FormControl>
                     <Slider
                       min={5}
@@ -104,7 +104,7 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                     />
                   </FormControl>
                   <span className="text-lg font-semibold text-primary w-32 text-right">
-                    ${field.value[0]} - ${field.value[1]}
+                    ₹{field.value[0]} - ₹{field.value[1]}
                   </span>
                 </div>
                 <FormDescription>Set the minimum and maximum price per meal.</FormDescription>

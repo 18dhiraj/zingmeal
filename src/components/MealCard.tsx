@@ -7,7 +7,7 @@ import type { Meal } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Leaf, Vegan, WheatOff, MilkOff, Ban, Clock, Flame, DollarSign, Eye, RefreshCw, Loader2 } from 'lucide-react';
+import { Leaf, Vegan, WheatOff, MilkOff, Ban, Clock, Flame, IndianRupee , Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MealCardProps {
@@ -22,8 +22,8 @@ interface MealCardProps {
 }
 
 const dietaryIconsMap = {
-  vegetarian: Leaf,
-  vegan: Vegan,
+  'vegetarian': Leaf,
+  'vegan': Vegan,
   'gluten-free': WheatOff,
   'dairy-free': MilkOff,
   'nut-free': Ban,
@@ -70,11 +70,11 @@ export function MealCard({
         <CardDescription className="text-base text-muted-foreground line-clamp-3">{meal.description}</CardDescription>
         
         <div className="flex flex-wrap gap-2">
-          {meal.dietaryTags.map((tag) => {
-            const IconComponent = dietaryIconsMap[tag];
+          {meal.dietaryTags.map((tag ) => {
+            // const IconComponent : any|  = dietaryIconsMap[tag];
             return (
               <Badge key={tag} variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5">
-                {IconComponent && <IconComponent className="w-4 h-4" />}
+                {/* {IconComponent && <IconComponent className="w-4 h-4" />} */}
                 <span className="capitalize">{tag.replace('-', ' ')}</span>
               </Badge>
             );
@@ -83,8 +83,8 @@ export function MealCard({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2 text-sm">
           <div className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-accent" />
-            <span className="font-medium">${meal.price.toFixed(2)}</span>
+            <IndianRupee  className="w-5 h-5 text-accent" />
+            <span className="font-medium">₹{meal.price.toFixed(2)}</span>
           </div>
           {meal.calories && (
             <div className="flex items-center gap-2">

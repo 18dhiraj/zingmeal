@@ -22,6 +22,7 @@ export interface Meal {
   status: number; // <-- Add this if it's missing
   createdAt?: any;
   updatedAt?: any;
+  html: String;
 }
 
 

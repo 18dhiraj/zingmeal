@@ -1,4 +1,4 @@
-# **App Name**: MealFinder
+# **App Name**: ZingMeal
 
 ## Core Features:
 

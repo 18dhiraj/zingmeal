@@ -1,5 +1,5 @@
 import type { Meal, MealFilters } from '@/types';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, limit, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase"; // Make sure your Firestore instance is initialized here
 
 const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
@@ -15,6 +15,14 @@ const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
     }
   }
   return true;
+};
+
+export const fetchNewMeals = async (): Promise<Meal[]> => {
+  const mealsRef = collection(db, 'meals');
+  const q = query(mealsRef, orderBy('createdAt', 'desc'), limit(6));
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Meal));
 };
 
 const getAllMeals = async (): Promise<Meal[]> => {
