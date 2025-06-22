@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { MealFinderForm } from '@/components/MealFinderForm';
+import { MealFinderForm } from '../../components/MealFinderForm';
 import type { MealFilters } from '@/types';
 import { fetchMeals } from '@/lib/mealService';
 import { ChefHat } from 'lucide-react';
