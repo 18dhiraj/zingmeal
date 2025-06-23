@@ -16,6 +16,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import LoginInfoTip from '@/components/LoginInfo';
+import { Copy, FileDown } from "lucide-react";
+
 
 const dietaryIconsMap: { [key: string]: React.ElementType } = {
   vegetarian: Leaf,
@@ -238,25 +240,41 @@ function MealDetailsContent() {
 
         <Separator />
         <div>
-          <div className='flex justify-between items-center'>
-            <h3 className="text-xl font-semibold text-primary mb-3 flex items-center gap-2">
+          <div className="flex justify-between items-center flex-wrap gap-y-2">
+            <h3 className="text-xl font-semibold text-primary flex items-center gap-2 mb-2 sm:mb-3">
               <Utensils className="w-6 h-6" /> Ingredients
             </h3>
-            <div className="flex gap-2 mb-2">
-              <Button variant="outline" size="sm" onClick={handleCopyIngredients}>
-                Copy Ingredients
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyIngredients}
+                className="flex items-center gap-2 px-2 sm:px-4"
+                title="Copy Ingredients"
+              >
+                <Copy className="h-4 w-4" />
+                <span className="hidden sm:inline">Copy Ingredients</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
-                Download PDF
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadPDF}
+                className="flex items-center gap-2 px-2 sm:px-4"
+                title="Download PDF"
+              >
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">Download PDF</span>
               </Button>
             </div>
           </div>
+
           <ul className="list-disc list-inside space-y-1 text-muted-foreground pl-2">
             {meal.ingredients.map((ingredient, index) => (
               <li key={index}>{ingredient}</li>
             ))}
           </ul>
         </div>
+
 
         <Separator />
         <div>
