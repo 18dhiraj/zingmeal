@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { DietaryPreference, MealFilters } from '@/types';
-import { Utensils, IndianRupee , Beef } from 'lucide-react';
+import { Utensils, IndianRupee, Beef } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const normalize = (str: string) => str.trim().toLowerCase().replace(/\s+/g, '-');
@@ -36,14 +36,23 @@ const mealsPerDayOptions = [
 ];
 
 const formSchema = z.object({
-  priceRange: z.array(z.number()).length(2).default([5, 50])
-    .refine(data => data[0] >= 5 && data[1] <= 100, {
-      message: "Price must be between ₹5 and ₹100.",
-    })
-    .refine(data => data[0] <= data[1], {
-      message: "Min price cannot be greater than max price.",
-      path: ["priceRange"],
-    }),
+  priceRange: z
+    .array(z.number())
+    .length(2)
+    .default([50, 2000])                      // new default within the allowed bounds
+    .refine(
+      (data) => data[0] >= 50 && data[1] <= 2000,
+      {
+        message: "Price must be between ₹50 and ₹2000.",
+      }
+    )
+    .refine(
+      (data) => data[0] <= data[1],
+      {
+        message: "Min price cannot be greater than max price.",
+        path: ["priceRange"],
+      }
+    ),
   dietaryPreferences: z.array(z.string()).default([]),
   mealsPerDay: z.coerce.number().min(1).max(5).default(1),
 });
@@ -59,7 +68,7 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
   const form = useForm<MealFinderFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      priceRange: [5, 50],
+      priceRange: [50, 1000],
       dietaryPreferences: [],
       mealsPerDay: 1,
     },
@@ -77,7 +86,7 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
 
   return (
     <>
-      <h2 className="text-3xl font-headline text-center flex items-center justify-center gap-2 mb-8 text-primary">
+      <h2 className="text-2xl font-headline text-center flex items-center justify-center gap-2 mb-4 text-primary">
         <Utensils className="w-8 h-8" />
         Find Your Perfect Meal Plan
       </h2>
@@ -91,11 +100,11 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
               <FormItem>
                 <FormLabel className="text-lg font-medium">Price Range</FormLabel>
                 <div className="flex items-center space-x-4">
-                  <IndianRupee  className="h-5 w-5 text-muted-foreground" />
+                  <IndianRupee className="h-5 w-5 text-muted-foreground" />
                   <FormControl>
                     <Slider
-                      min={5}
-                      max={100}
+                      min={50}
+                      max={2000}
                       step={1}
                       value={field.value}
                       onValueChange={field.onChange}
@@ -103,7 +112,7 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                       aria-label="Price range slider"
                     />
                   </FormControl>
-                  <span className="text-lg font-semibold text-primary w-32 text-right">
+                  <span className="text-lg font-semibold text-primary w-52 border text-right">
                     ₹{field.value[0]} - ₹{field.value[1]}
                   </span>
                 </div>

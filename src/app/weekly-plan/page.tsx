@@ -17,7 +17,22 @@ import autoTable from "jspdf-autotable";
 
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const mealsPerDay = ["Breakfast", "Lunch", "Dinner"];
-const AVAILABLE_TAGS = ["vegan", "vegetarian", "keto", "gluten-free", "dairy-free", "paleo"];
+// const AVAILABLE_TAGS = ["vegan", "vegetarian", "keto", "gluten-free", "dairy-free", "paleo"];
+
+const normalize = (str: string) => str.trim().toLowerCase().replace(/\s+/g, '-');
+
+const dietaryTagsEnv = process.env.NEXT_PUBLIC_DIETARY_TAGS || '';
+const AVAILABLE_TAGS = dietaryTagsEnv
+  .split(',')
+  .map(tag => tag.trim())
+  .filter(Boolean);
+
+// // Ensure 'normalize(label)' returns a value compatible with 'DietaryPreferenceValue'
+// const AVAILABLE_TAGS: DietaryPreference[] = dietaryTagsFromEnv.map(label => ({
+//   id: normalize(label) as DietaryPreference['id'],
+//   label,
+// }));
+
 
 export default function WeeklyPlanPage() {
     const [mealPlan, setMealPlan] = useState<Record<string, Record<string, string>>>(() =>
