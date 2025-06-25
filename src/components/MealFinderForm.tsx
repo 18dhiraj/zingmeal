@@ -112,7 +112,7 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                       aria-label="Price range slider"
                     />
                   </FormControl>
-                  <span className="text-lg font-semibold text-primary w-52 border text-right">
+                  <span className="text-lg font-semibold text-primary w-52 text-right">
                     ₹{field.value[0]} - ₹{field.value[1]}
                   </span>
                 </div>
