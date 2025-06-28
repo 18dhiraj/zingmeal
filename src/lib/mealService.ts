@@ -2,6 +2,7 @@ import type { Meal, MealFilters } from '@/types';
 import { collection, getDocs, limit, query, orderBy, where, doc, setDoc, getDoc } from "firebase/firestore";
 import { getAuth } from 'firebase/auth';
 import { db } from "../firebase"; // Make sure your Firestore instance is initialized here
+import { Timestamp } from 'firebase/firestore';
 
 const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
   if (meal.price < filters.minPrice || meal.price > filters.maxPrice) {
@@ -18,6 +19,11 @@ const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
   return true;
 };
 
+const toISO = (v: any) =>
+  v instanceof Timestamp ? v.toDate().toISOString()
+  : v instanceof Date    ? v.toISOString()
+  : v;
+
 export const fetchNewMeals = async (): Promise<Meal[]> => {
   const mealsRef = collection(db, 'meals');
   const q = query(
@@ -28,23 +34,31 @@ export const fetchNewMeals = async (): Promise<Meal[]> => {
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Meal));
+  return snapshot.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id,
+      ...data,
+      createdAt: toISO(data.createdAt),
+      updatedAt: toISO(data.updatedAt),
+    } as Meal;
+  });
 };
 
 const getAllMeals = async (): Promise<Meal[]> => {
-  const querySnapshot = await getDocs(collection(db, "meals"));
-  const meals: Meal[] = [];
+  const snap = await getDocs(collection(db, 'meals'));
 
-  querySnapshot.forEach(doc => {
-    const data = doc.data();
-
-    if (data.status === 1) {
-      const { id: _ignored, ...rest } = data;
-      meals.push({ id: doc.id, ...rest } as Meal);
-    }
-  });
-
-  return meals;
+  return snap.docs
+    .filter(d => d.data().status === 1)
+    .map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        createdAt: toISO(data.createdAt),
+        updatedAt: toISO(data.updatedAt),
+      } as Meal;
+    });
 };
 
 export const saveWeeklyPlan = async (mealPlan: Record<string, Record<string, string>>) => {
@@ -65,15 +79,20 @@ export const saveWeeklyPlan = async (mealPlan: Record<string, Record<string, str
 
 export async function getMeals(): Promise<Meal[]> {
   try {
-    const q = query(collection(db, "meals"), where("status", "==", 1));
-    const snapshot = await getDocs(q);
+    const q = query(collection(db, 'meals'), where('status', '==', 1));
+    const snap = await getDocs(q);
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Meal[];
-  } catch (error) {
-    console.error("Error fetching meals:", error);
+    return snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        createdAt: toISO(data.createdAt),
+        updatedAt: toISO(data.updatedAt),
+      } as Meal;
+    });
+  } catch (err) {
+    console.error('Error fetching meals:', err);
     return [];
   }
 }

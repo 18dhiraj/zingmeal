@@ -1,100 +1,14 @@
-// app/page.tsx
-"use client";
-
-import { useRef, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ChefHat, Bookmark, LogOut, Calendar, User as Avatar } from "lucide-react";
 import Image from "next/image";
-import { PopularMeals } from '../components/PopularMeals';
-import { auth } from "@/firebase";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { PopularMeals } from '../components/Homepage/PopularMeals';
 import Link from "next/link";
+import HomeHeader from "@/components/Homepage/HomeHeader";
+import HeroSection from "@/components/Homepage/HeroSection";
 
 export default function HomePage() {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
-    const [user, setUser] = useState<User | null>(null);
-
-    const scrollToMeals = () => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
-        });
-        return () => unsubscribe();
-    }, []);
-
-    const handleLogout = async () => {
-        await signOut(auth);
-        setUser(null);
-    };
 
     return (
         <main className="flex flex-col min-h-screen">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-black/10 backdrop-blur-[1px] text-white px-4 sm:px-6 py-3 shadow-sm">
-                <div className="flex flex-wrap justify-between items-center gap-y-2">
-                    {/* Logo Section */}
-                    <div className="flex items-center gap-2">
-                        <ChefHat className="w-6 h-6 text-white" />
-                        <span className="text-xl font-semibold tracking-wide">ZingMeal</span>
-                    </div>
-
-                    {/* Right Controls */}
-                    <div className="flex flex-wrap items-center gap-2 justify-end w-auto sm:w-auto">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.push("/favorites")}
-                            className="text-white hover:bg-white/40 border border-white/30 flex items-center gap-1"
-                        >
-                            <Bookmark className="h-5 w-5" />
-                            <span className="hidden sm:inline">Favorites</span>
-                        </Button>
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => user ? router.push("/weekly-plan") : router.push("/login")}
-                            className="text-white hover:bg-white/40 border border-white/30 flex items-center gap-1"
-                        >
-                            <Calendar className="h-5 w-5" />
-                            <span className="hidden sm:inline">Weekly Plan</span>
-                        </Button>
-
-                        {user ? (
-                            <>
-                                <span className="hidden sm:inline text-sm text-white truncate max-w-[120px]">
-                                    {user.displayName || user.email}
-                                </span>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleLogout}
-                                    className="text-white hover:bg-white/40 flex items-center"
-                                >
-                                    <LogOut className="h-5 w-5" />
-                                </Button>
-                            </>
-                        ) : (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => router.push("/login")}
-                                className="text-white hover:bg-white/40 border border-white/30 flex items-center gap-1"
-                            >
-                                <Avatar className="h-5 w-5" />
-                                <span className="hidden sm:inline">Login</span>
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            </header>
-
-            {/* Hero Section */}
+            <HomeHeader />
             <section className="relative h-screen w-full -mt-[60px]">
                 <Image
                     src="/images/hero-meal1.jpg"
@@ -105,36 +19,11 @@ export default function HomePage() {
                 />
                 <div className="absolute inset-0 bg-black/20 z-10" />
                 <div className="absolute inset-0 flex items-center justify-end z-20 px-6 sm:px-48">
-                    <div className="bg-black/20 backdrop-blur-[1px] border border-white/20 p-8 rounded-2xl max-w-md w-full text-left shadow-xl space-y-6">
-                        <div className="flex items-center gap-3">
-                            <ChefHat className="w-8 h-8 text-white" />
-                            <h1 className="text-3xl font-semibold text-white">Find Your Perfect Meal</h1>
-                        </div>
-                        <p className="text-white/80 text-sm leading-relaxed">
-                            Discover meals tailored to your taste. Filter by diet, budget, and more. Save plans, copy ingredients, and download PDFs for easy shopping.
-                        </p>
-                        <div className="space-y-3">
-                            <button
-                                onClick={() => router.push("/meal-finder")}
-                                className="w-full text-base font-semibold text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:from-pink-600 hover:via-red-600 hover:to-yellow-600 transition duration-200 rounded-full py-3 shadow-lg"
-                            >
-                                🍽️ Discover Meals for You
-                            </button>
-
-                            <button
-                                onClick={scrollToMeals}
-                                className="block w-full text-center text-sm text-white/80 hover:text-white transition"
-                            >
-                                ↓ See Newest Meals
-                            </button>
-                        </div>
-                    </div>
+                    <HeroSection />
                 </div>
-
             </section>
 
-            {/* Popular Meals Section */}
-            <section ref={scrollRef} className="bg-background py-16 px-4 sm:px-8">
+            <section id="popular-meals-section" className="bg-background py-16 px-4 sm:px-8">
                 <div className="max-w-6xl mx-auto text-center mb-10">
                     <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-2">Newest Meals</h2>
                     <p className="text-muted-foreground">Loved by users and highly rated</p>
@@ -168,7 +57,7 @@ export default function HomePage() {
 
                     <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden shadow-lg">
                         <Image
-                            src="/images/hero-meal.jpg" // Add a modern visual here
+                            src="/images/hero-meal.jpg"
                             alt="Meal planning made easy"
                             fill
                             className="object-cover"
@@ -181,7 +70,6 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-            {/* Footer */}
             <footer className="bg-card border-t mt-10">
                 <div className="max-w-6xl mx-auto px-4 py-10 sm:px-8 flex flex-col sm:flex-row justify-between items-center gap-6 text-muted-foreground text-sm">
                     <div className="text-center sm:text-left">
@@ -191,7 +79,6 @@ export default function HomePage() {
                         <Link href="/about" className="hover:text-primary transition-colors">
                             About
                         </Link>
-                        {/* <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a> */}
                         <a
                             href="mailto:officialdhiraj00@gmail.com"
                             className="hover:text-primary transition-colors"

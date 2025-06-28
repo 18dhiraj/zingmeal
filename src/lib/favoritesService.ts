@@ -1,8 +1,17 @@
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { db } from '@/firebase';
+/* ───────────────────────────── common imports ───────────────────────────── */
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore';
+import { db } from '@/firebase';               // client‑side Firestore
 import type { SavedMealPlan, MealFilters } from '@/types';
 import { getAuth } from 'firebase/auth';
 
+/* ───────────────────────────── browser helpers ──────────────────────────── */
 const SAVED_MEALS_KEY = 'mealFinder_savedIndividualMeals';
 const SAVED_PLANS_KEY = 'mealFinder_savedPlans';
 
@@ -19,13 +28,9 @@ const getUserRef = () => {
   return user ? doc(db, 'users', user.uid) : null;
 };
 
-// --- Helper: Plan ID Generator ---
-const generatePlanId = (mealIds: string[]): string => {
-  return [...mealIds].sort().join(',');
-};
+const generatePlanId = (mealIds: string[]) => [...mealIds].sort().join(',');
 
-// --- Individual Meals ---
-
+/* ──────────────────────────── INDIVIDUAL MEALS ─────────────────────────── */
 export const getSavedIndividualMealIds = async (): Promise<string[]> => {
   if (!isBrowser) return [];
 
@@ -34,43 +39,41 @@ export const getSavedIndividualMealIds = async (): Promise<string[]> => {
     try {
       const userRef = getUserRef();
       if (!userRef) return [];
-
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        return Array.isArray(data.savedIndividualMealIds) ? data.savedIndividualMealIds : [];
+        return Array.isArray(data.savedIndividualMealIds)
+          ? data.savedIndividualMealIds
+          : [];
       }
-    } catch (error) {
-      console.error('Error getting saved meals from Firestore:', error);
+    } catch (err) {
+      console.error('Error getting saved meals from Firestore:', err);
     }
     return [];
   }
 
+  /* localStorage fallback */
   try {
-    const mealIdsJson = localStorage.getItem(SAVED_MEALS_KEY);
-    return mealIdsJson ? JSON.parse(mealIdsJson) : [];
+    const v = localStorage.getItem(SAVED_MEALS_KEY);
+    return v ? JSON.parse(v) : [];
   } catch (err) {
     console.error('Error parsing local saved meals:', err);
     return [];
   }
 };
 
-export const saveIndividualMeal = async (mealId: string): Promise<void> => {
+export const saveIndividualMeal = async (mealId: string) => {
   if (!isBrowser) return;
 
   const user = getCurrentUser();
   if (user) {
     const userRef = getUserRef();
     if (!userRef) return;
-    try {
-      await setDoc(
-        userRef,
-        { savedIndividualMealIds: arrayUnion(mealId) },
-        { merge: true }
-      );
-    } catch (err) {
-      console.error('Error saving meal to Firestore:', err);
-    }
+    await setDoc(
+      userRef,
+      { savedIndividualMealIds: arrayUnion(mealId) },
+      { merge: true },
+    );
     return;
   }
 
@@ -81,35 +84,27 @@ export const saveIndividualMeal = async (mealId: string): Promise<void> => {
   }
 };
 
-export const removeIndividualMeal = async (mealId: string): Promise<void> => {
+export const removeIndividualMeal = async (mealId: string) => {
   if (!isBrowser) return;
 
   const user = getCurrentUser();
   if (user) {
     const userRef = getUserRef();
     if (!userRef) return;
-    try {
-      await updateDoc(userRef, {
-        savedIndividualMealIds: arrayRemove(mealId),
-      });
-    } catch (err) {
-      console.error('Error removing meal from Firestore:', err);
-    }
+    await updateDoc(userRef, {
+      savedIndividualMealIds: arrayRemove(mealId),
+    });
     return;
   }
 
-  let ids = await getSavedIndividualMealIds();
-  ids = ids.filter(id => id !== mealId);
+  const ids = (await getSavedIndividualMealIds()).filter((id) => id !== mealId);
   localStorage.setItem(SAVED_MEALS_KEY, JSON.stringify(ids));
 };
 
-export const isIndividualMealSaved = async (mealId: string): Promise<boolean> => {
-  const savedIds = await getSavedIndividualMealIds();
-  return savedIds.includes(mealId);
-};
+export const isIndividualMealSaved = async (mealId: string) =>
+  (await getSavedIndividualMealIds()).includes(mealId);
 
-// --- Meal Plans ---
-
+/* ───────────────────────────────── MEAL PLANS ───────────────────────────── */
 export const getSavedMealPlans = async (): Promise<SavedMealPlan[]> => {
   if (!isBrowser) return [];
 
@@ -129,11 +124,14 @@ export const getSavedMealPlans = async (): Promise<SavedMealPlan[]> => {
     return [];
   }
 
-  const plansJson = localStorage.getItem(SAVED_PLANS_KEY);
-  return plansJson ? JSON.parse(plansJson) : [];
+  const json = localStorage.getItem(SAVED_PLANS_KEY);
+  return json ? JSON.parse(json) : [];
 };
 
-export const saveMealPlan = async (mealIds: string[], filters: MealFilters): Promise<SavedMealPlan | null> => {
+export const saveMealPlan = async (
+  mealIds: string[],
+  filters: MealFilters,
+): Promise<SavedMealPlan | null> => {
   if (!isBrowser) return null;
 
   const newPlan: SavedMealPlan = {
@@ -148,56 +146,94 @@ export const saveMealPlan = async (mealIds: string[], filters: MealFilters): Pro
     const userRef = getUserRef();
     if (!userRef) return null;
 
-    try {
-      const docSnap = await getDoc(userRef);
-      const currentPlans = docSnap.exists() && Array.isArray(docSnap.data().savedMealPlans)
+    const docSnap = await getDoc(userRef);
+    const currentPlans: SavedMealPlan[] =
+      docSnap.exists() && Array.isArray(docSnap.data().savedMealPlans)
         ? docSnap.data().savedMealPlans
         : [];
 
-      const alreadyExists = currentPlans.some((p: SavedMealPlan) => p.id === newPlan.id);
-      if (!alreadyExists) {
-        await setDoc(userRef, { savedMealPlans: arrayUnion(newPlan) }, { merge: true });
-      }
-      return newPlan;
-    } catch (err) {
-      console.error('Error saving meal plan to Firestore:', err);
-      return null;
+    if (!currentPlans.some((p) => p.id === newPlan.id)) {
+      await setDoc(
+        userRef,
+        { savedMealPlans: arrayUnion(newPlan) },
+        { merge: true },
+      );
     }
+    return newPlan;
   }
 
+  /* localStorage fallback */
   const plans = await getSavedMealPlans();
-  if (plans.some(p => p.id === newPlan.id)) return newPlan;
-
-  plans.push(newPlan);
-  localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
+  if (!plans.some((p) => p.id === newPlan.id)) {
+    plans.push(newPlan);
+    localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
+  }
   return newPlan;
 };
 
-export const removeMealPlan = async (planId: string): Promise<void> => {
+export const removeMealPlan = async (planId: string) => {
   if (!isBrowser) return;
 
   const user = getCurrentUser();
   if (user) {
     const userRef = getUserRef();
     if (!userRef) return;
-    try {
-      const docSnap = await getDoc(userRef);
-      const currentPlans: SavedMealPlan[] = docSnap.exists() ? docSnap.data().savedMealPlans || [] : [];
-      const updatedPlans = currentPlans.filter((p) => p.id !== planId);
-      await updateDoc(userRef, { savedMealPlans: updatedPlans });
-    } catch (err) {
-      console.error('Error removing plan from Firestore:', err);
-    }
+    const docSnap = await getDoc(userRef);
+    const current: SavedMealPlan[] =
+      docSnap.exists() ? docSnap.data().savedMealPlans || [] : [];
+    await updateDoc(userRef, {
+      savedMealPlans: current.filter((p) => p.id !== planId),
+    });
     return;
   }
 
-  let plans = await getSavedMealPlans();
-  plans = plans.filter(p => p.id !== planId);
+  const plans = (await getSavedMealPlans()).filter((p) => p.id !== planId);
   localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
 };
 
-export const isMealPlanSaved = async (mealIds: string[]): Promise<boolean> => {
-  const plans = await getSavedMealPlans();
-  const id = generatePlanId(mealIds);
-  return plans.some(p => p.id === id);
+export const isMealPlanSaved = async (mealIds: string[]) =>
+  (await getSavedMealPlans()).some((p) => p.id === generatePlanId(mealIds));
+
+/* ───────────────────────────── SERVER‑ONLY HELPERS ────────────────────────
+   These load Firebase Admin **lazily** to stay out of the browser bundle.
+   ------------------------------------------------------------------------- */
+
+const getAdminDb = () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('Firebase Admin helpers should never run in the browser');
+  }
+  // Lazy‑require to avoid pulling admin SDK into client bundles
+  // Adjust the path if your admin initialisation lives elsewhere
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { db: adminDb } = require('@/firebase');
+  return adminDb as any //FirebaseFirestore.Firestore;
 };
+
+export async function getSavedMealPlansServer(
+  uid: string,
+): Promise<SavedMealPlan[]> {
+  const adminDb = getAdminDb();
+  const snapshot = await adminDb
+    .collection('users')
+    .doc(uid)
+    .get();
+
+  if (!snapshot.exists) return [];
+
+  const data = snapshot.data() as { savedMealPlans?: SavedMealPlan[] };
+  return Array.isArray(data.savedMealPlans) ? data.savedMealPlans : [];
+}
+
+export async function getSavedIndividualMealIdsServer(
+  uid: string,
+): Promise<string[]> {
+  const adminDb = getAdminDb();
+  const snapshot = await adminDb.collection('users').doc(uid).get();
+
+  if (!snapshot.exists) return [];
+
+  const data = snapshot.data() as { savedIndividualMealIds?: string[] };
+  return Array.isArray(data.savedIndividualMealIds)
+    ? data.savedIndividualMealIds
+    : [];
+}

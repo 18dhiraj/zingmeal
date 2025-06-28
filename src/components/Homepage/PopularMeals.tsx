@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Meal } from "@/types"; // Update path based on your project
-import { fetchNewMeals } from "../lib/mealService"; // Replace with your actual fetch function
+import { fetchNewMeals } from "../../lib/mealService"; // Replace with your actual fetch function
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -17,7 +17,7 @@ export const PopularMeals = () => {
     useEffect(() => {
         const loadPopularMeals = async () => {
             try {
-                const meals = await fetchNewMeals(); // You can limit to top 6 in your service
+                const meals = await fetchNewMeals();
                 setPopularMeals(meals);
             } catch (error) {
                 console.error("Failed to load popular meals:", error);
