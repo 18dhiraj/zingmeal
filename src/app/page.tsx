@@ -1,10 +1,26 @@
+'use client'
+
 import Image from "next/image";
 import { PopularMeals } from '../components/Homepage/PopularMeals';
 import Link from "next/link";
 import HomeHeader from "@/components/Homepage/HomeHeader";
 import HeroSection from "@/components/Homepage/HeroSection";
+import { useEffect } from "react";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "@/firebase";
 
 export default function HomePage() {
+    // localStorage.setItem('debug_mode', 'true');
+    useEffect(() => {
+        if (analytics) {
+            logEvent(analytics, "homepage_test_event", {
+                page_title: "HomePage",
+                ts: Date.now(),
+            });
+            alert('test')
+
+        }
+    }, []);
 
     return (
         <main className="flex flex-col min-h-screen">

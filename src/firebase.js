@@ -1,10 +1,10 @@
-// lib/firebase.ts or firebase.js
-
-import { initializeApp } from "firebase/app";
+// lib/firebase.ts
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
-// Firebase configuration from environment variables
+// ---- config -------------------------------------------------------------
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,17 +12,23 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // required
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// ---- core singletons ----------------------------------------------------
+export const app =
+  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Firestore
-const db = getFirestore(app);
+export const db = getFirestore(app);
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 
-// Firebase Auth
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
+// ---- analytics (browser‑only) ------------------------------------------
+export let analytics = null;
 
-// Exports
-export { app, db, auth, googleProvider };
+if (typeof window !== "undefined") {
+  // avoid SSR crash and mobile Safari w/o cookies
+  isSupported().then((ok) => {
+    if (ok) analytics = getAnalytics(app);
+  });
+}
