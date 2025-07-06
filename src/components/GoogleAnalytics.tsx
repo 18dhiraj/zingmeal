@@ -1,20 +1,26 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { pageview, GA_TRACKING_ID } from '@/lib/analytics';
 
-export default function GoogleAnalytics() {
+// Component that handles page view tracking
+function PageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (GA_TRACKING_ID) {
-      const url = pathname + searchParams.toString();
+      const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
       pageview(url);
     }
   }, [pathname, searchParams]);
 
+  return null;
+}
+
+// Main GoogleAnalytics component
+export default function GoogleAnalytics() {
   if (!GA_TRACKING_ID) {
     return null;
   }
@@ -37,6 +43,9 @@ export default function GoogleAnalytics() {
           `,
         }}
       />
+      <Suspense fallback={null}>
+        <PageViewTracker />
+      </Suspense>
     </>
   );
 }
