@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { DietaryPreference, MealFilters } from '@/types';
 import { Utensils, IndianRupee, Beef } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { trackMealPlanGeneration } from '@/lib/analytics';
 
 const normalize = (str: string) => str.trim().toLowerCase().replace(/\s+/g, '-');
 
@@ -81,6 +82,12 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
       dietaryPreferences: values.dietaryPreferences as MealFilters['dietaryPreferences'],
       mealsPerDay: values.mealsPerDay,
     };
+    
+    // Track meal plan generation
+    trackMealPlanGeneration(
+      `${values.mealsPerDay} meals - ₹${values.priceRange[0]}-₹${values.priceRange[1]} - ${values.dietaryPreferences.join(', ') || 'No preferences'}`
+    );
+    
     onSubmit(mealFiltersSubmit);
   };
 
