@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Vegan, WheatOff, MilkOff, Ban, Clock, Flame, IndianRupee , Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { trackMealView } from '@/lib/analytics';
 
 interface MealCardProps {
   meal: Meal;
@@ -43,6 +44,11 @@ export function MealCard({
     if (onSwapMeal) {
       onSwapMeal(meal.id, mealIndexInPlan);
     }
+  };
+
+  const handleDetailsClick = () => {
+    // Track meal view when user clicks to see details
+    trackMealView(meal.id, meal.name);
   };
 
   const currentIsSwapping = isSwappingThisCard || isSwapping;
@@ -102,7 +108,7 @@ export function MealCard({
       </CardContent>
       <CardFooter className="flex flex-col gap-2 pt-0 p-6 mt-auto">
         <Link href={`/meals/${meal.id}/details`} passHref className="w-full">
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full" onClick={handleDetailsClick}>
             <Eye className="mr-2 h-4 w-4" />
             See More Details
           </Button>

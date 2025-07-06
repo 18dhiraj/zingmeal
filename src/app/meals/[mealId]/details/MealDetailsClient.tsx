@@ -15,6 +15,7 @@ import { fetchMealById } from '@/lib/mealService';
 import type { Meal } from '@/types';
 import jsPDF from 'jspdf';
 import LoginInfoTip from '@/components/LoginInfo';
+import { trackMealView, trackMealFavorite, trackMealShare, trackMealIngredientsCopy, trackMealPDFDownload } from '@/lib/analytics';
 
 const dietaryIconsMap = {
   vegetarian: Leaf,
@@ -51,6 +52,8 @@ function MealDetailsContent() {
         }
         setMeal(m);
         setSaved(await isIndividualMealSaved(mealId));
+        // Track meal view
+        trackMealView(mealId, m.name);
       } catch {
         setError('Failed to load meal.');
       } finally {
@@ -65,15 +68,23 @@ function MealDetailsContent() {
       await removeIndividualMeal(meal.id);
       setSaved(false);
       toast({ title: 'Meal Unsaved', description: `${meal.name} removed.` });
+      // Track favorite removal
+      trackMealFavorite(meal.id, meal.name, 'remove');
     } else {
       await saveIndividualMeal(meal.id);
       setSaved(true);
       toast({ title: 'Meal Saved!', description: `${meal.name} added.` });
+      // Track favorite addition
+      trackMealFavorite(meal.id, meal.name, 'add');
     }
   };
 
   const share = async () => {
+    if (!meal) return;
     const url = location.href;
+    // Track share event
+    trackMealShare(meal.id, meal.name);
+    
     if (navigator.share) {
       try { await navigator.share({ title: meal?.name, url }); } catch { }
     } else {
@@ -91,6 +102,8 @@ function MealDetailsContent() {
     try {
       await navigator.clipboard.writeText(meal.ingredients.map(i => `- ${i}`).join('\n'));
       toast({ title: 'Copied!', description: 'Ingredients copied.' });
+      // Track ingredients copy
+      trackMealIngredientsCopy(meal.id, meal.name);
     } catch {
       toast({ title: 'Error', description: 'Could not copy.', variant: 'destructive' });
     }
@@ -98,6 +111,9 @@ function MealDetailsContent() {
 
   const downloadPDF = () => {
     if (!meal) return;
+    // Track PDF download
+    trackMealPDFDownload(meal.id, meal.name);
+    
     const doc = new jsPDF();
     doc.setFontSize(18).text(meal.name, 10, 15);
     doc.setFontSize(14).text('Ingredients:', 10, 30);

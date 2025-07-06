@@ -10,6 +10,7 @@ import {
 import { auth, googleProvider, db } from '@/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import { trackLoginAttempt, trackLoginSuccess, trackUserLogout } from '@/lib/analytics';
 import {
     LogOut,
     LogIn,
@@ -31,6 +32,7 @@ export default function AuthClient({ initialUid }: Props) {
     const syncUserDoc = async (firebaseUser: User) => {
         const ref = doc(db, 'users', firebaseUser.uid);
         const snap = await getDoc(ref);
+        let isNewUser = false;
 
         if (!snap.exists()) {
             await setDoc(ref, {
@@ -40,16 +42,22 @@ export default function AuthClient({ initialUid }: Props) {
                 createdAt: Date.now(),
             });
             setIsAdmin(false);
+            isNewUser = true;
         } else {
             setIsAdmin(snap.data().isAdmin === true);
+            isNewUser = false;
         }
+        
+        return isNewUser;
     };
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
                 setUser(firebaseUser);
-                await syncUserDoc(firebaseUser);
+                const isNewUser = await syncUserDoc(firebaseUser);
+                // Track successful login
+                trackLoginSuccess('google', isNewUser);
                 router.replace('/');
             } else {
                 setUser(null);
@@ -59,8 +67,19 @@ export default function AuthClient({ initialUid }: Props) {
         return unsub;
     }, [router]);
 
-    const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
-    const logout = () => signOut(auth);
+    const loginWithGoogle = async () => {
+        trackLoginAttempt('google');
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            console.error('Login failed:', error);
+        }
+    };
+    
+    const logout = () => {
+        trackUserLogout();
+        signOut(auth);
+    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8 text-center">

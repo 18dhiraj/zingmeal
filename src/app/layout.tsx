@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ChefHat, Bookmark } from 'lucide-react';
 import UserHeader from '@/components/UserHeader';
 import LayoutClientWrapper from '@/components/LayoutClientWrapper'; // ✅
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 export const metadata: Metadata = {
   title: 'ZingMeal - Find meals you like!',
@@ -61,6 +62,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet" />
+        <GoogleAnalytics />
       </head>
       <body className="font-body antialiased min-h-screen">
         <div className="flex flex-col min-h-screen">

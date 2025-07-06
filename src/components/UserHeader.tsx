@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { auth } from '@/firebase';
 import { useRouter } from "next/navigation";
 import { useIsMobile } from '../hooks/use-mobile'; // adjust path based on project
+import { trackUserLogout } from '@/lib/analytics';
 
 export default function UserHeader() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,9 +21,12 @@ export default function UserHeader() {
   }, []);
 
   const logout = async () => {
+    // Track logout event
+    trackUserLogout();
     router.push("/");
     await signOut(auth);
   };
+
 
   if (!user) {
     return (

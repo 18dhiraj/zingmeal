@@ -59,6 +59,7 @@ export default function FavoritePageMarkup({
     onRemoveIndividualMeal,
 }: Props) {
     const isEmpty = savedPlans.length === 0 && savedIndividualMeals.length === 0;
+    
 
     return (
         <main className="flex-grow container mx-auto px-4 py-8">
