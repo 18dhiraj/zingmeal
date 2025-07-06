@@ -7,6 +7,14 @@ declare global {
 }
 
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID;
+export const GA_DEBUG = process.env.NEXT_PUBLIC_GA_DEBUG === 'true';
+
+// Debug logging function
+const debugLog = (message: string, data?: any) => {
+  if (GA_DEBUG) {
+    console.log(`🎯 [GA4 Debug] ${message}`, data || '');
+  }
+};
 
 // Track page views
 export const pageview = (url: string) => {
@@ -14,6 +22,7 @@ export const pageview = (url: string) => {
     window.gtag('config', GA_TRACKING_ID!, {
       page_path: url,
     });
+    debugLog(`Page view tracked: ${url}`);
   }
 };
 
@@ -29,6 +38,11 @@ export const event = ({ action, category, label, value }: {
       event_category: category,
       event_label: label,
       value: value,
+    });
+    debugLog(`Event tracked: ${action}`, {
+      category,
+      label,
+      value
     });
   }
 };
