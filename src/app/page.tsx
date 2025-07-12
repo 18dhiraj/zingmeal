@@ -70,7 +70,7 @@ export default function HomePage() {
 
                     <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden shadow-lg">
                         <Image
-                            src="/images/hero-meal.jpg"
+                            src={require("../../public/images/hero-meal.jpg")}
                             alt="Meal planning made easy"
                             fill
                             className="object-cover"
