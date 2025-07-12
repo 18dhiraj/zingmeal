@@ -8,6 +8,7 @@ import HeroSection from "@/components/Homepage/HeroSection";
 import { useEffect } from "react";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "@/firebase";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
 
@@ -34,6 +35,13 @@ export default function HomePage() {
                     <p className="text-muted-foreground">Loved by users and highly rated</p>
                 </div>
                 <PopularMeals />
+                <div className="max-w-6xl mx-auto text-center mt-8">
+                    <Link href="/explore">
+                        <Button className="bg-primary text-white hover:bg-primary/90 px-8 py-2 rounded-lg text-lg font-semibold transition-all">
+                            Explore More
+                        </Button>
+                    </Link>
+                </div>
             </section>
             <section className="bg-muted py-20 px-4 sm:px-8">
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">

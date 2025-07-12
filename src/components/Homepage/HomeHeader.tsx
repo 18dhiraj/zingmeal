@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { ChefHat, Bookmark, Calendar, LogOut, User as Avatar } from 'lucide-react'
+import { ChefHat, Bookmark, Calendar, LogOut, User as Avatar, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation';
 import { auth } from "@/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -36,6 +36,15 @@ const HomeHeader = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 justify-end w-auto sm:w-auto">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push("/explore?focus=true")}
+                        className="text-white hover:bg-white/40 p-2"
+                    >
+                        <Search className="h-5 w-5" />
+                    </Button>
+                    
                     <Button
                         variant="ghost"
                         size="sm"

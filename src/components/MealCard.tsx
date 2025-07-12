@@ -54,7 +54,7 @@ export function MealCard({
   const currentIsSwapping = isSwappingThisCard || isSwapping;
 
   return (
-    <Card className={cn("w-full shadow-xl overflow-hidden flex flex-col", animationClass)}>
+    <Card className={cn("w-full overflow-hidden flex flex-col border-0 shadow-0", animationClass)}>
       <CardHeader className="p-0">
         <div className="relative w-full h-64">
           <Image

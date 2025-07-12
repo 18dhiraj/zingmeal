@@ -20,15 +20,12 @@ export default async function FavoritesPage() {
 
   if (!uid) {
     return (
-      <>
-        <LoginInfoTip />
-        <FavoritesClient
-          savedPlans={[]}
-          savedPlanMeals={{}}
-          savedIndividualMeals={[]}
-          isGuest
-        />
-      </>
+      <FavoritesClient
+        savedPlans={[]}
+        savedPlanMeals={{}}
+        savedIndividualMeals={[]}
+        isGuest
+      />
     );
   }
 

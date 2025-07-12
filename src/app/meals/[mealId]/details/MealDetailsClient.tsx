@@ -149,26 +149,30 @@ function MealDetailsContent() {
 
   return (
     <Card className="w-full max-w-4xl shadow-lg">
-      <CardHeader className="relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          className="absolute left-4 top-4"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </Button>
+      <CardHeader className="space-y-4">
+        {/* Header with navigation and actions */}
+        <div className="flex justify-between items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="flex-shrink-0"
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
 
-        <div className="absolute right-4 top-4 flex gap-2">
-          <Button variant="outline" size="icon" onClick={share}>
-            <Share2 className="h-5 w-5" />
-          </Button>
-          <Button variant={saved ? 'default' : 'outline'} size="icon" onClick={toggleSave}>
-            <Heart className={`h-5 w-5 ${saved ? 'fill-destructive text-destructive' : ''}`} />
-          </Button>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button variant="outline" size="icon" onClick={share}>
+              <Share2 className="h-5 w-5" />
+            </Button>
+            <Button variant={saved ? 'default' : 'outline'} size="icon" onClick={toggleSave}>
+              <Heart className={`h-5 w-5 ${saved ? 'fill-destructive text-destructive' : ''}`} />
+            </Button>
+          </div>
         </div>
 
-        <CardTitle className="text-4xl text-center mt-6">{meal.name}</CardTitle>
+        {/* Meal title with proper spacing */}
+        <CardTitle className="text-2xl sm:text-3xl md:text-4xl text-center px-4 break-words">{meal.name}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
