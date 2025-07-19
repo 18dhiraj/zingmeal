@@ -1,13 +1,31 @@
-import type { Meal, MealFilters } from '@/types';
+import type { Meal, MealFilters, Currency } from '@/types';
 import { collection, getDocs, limit, query, orderBy, where, doc, setDoc, getDoc } from "firebase/firestore";
 import { getAuth } from 'firebase/auth';
 import { db } from "../firebase"; // Make sure your Firestore instance is initialized here
 import { Timestamp } from 'firebase/firestore';
+import { getMealPrice } from '@/utils/priceUtils';
 
-const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
-  if (meal.price < filters.minPrice || meal.price > filters.maxPrice) {
+// Simple conversion function - this will be replaced with dynamic rates when needed
+const convertPrice = (price: number, from: Currency, to: Currency): number => {
+  if (from === to) return price;
+  
+  // Using hardcoded rates for now - in production, these should come from an API
+  const rates: Record<Currency, Record<Currency, number>> = {
+    'INR': { 'INR': 1, 'USD': 0.012, 'EUR': 0.011 },
+    'USD': { 'USD': 1, 'INR': 83.2, 'EUR': 0.92 },
+    'EUR': { 'EUR': 1, 'INR': 90.5, 'USD': 1.09 }
+  };
+  
+  return Math.round(price * (rates[from]?.[to] || 1));
+};
+
+const satisfiesFilters = (meal: Meal, filters: MealFilters, currency: Currency = 'INR'): boolean => {
+  const price = getMealPrice(meal, currency, convertPrice);
+  
+  if (price < filters.minPrice || price > filters.maxPrice) {
     return false;
   }
+  
   if (filters.dietaryPreferences.length > 0) {
     const mealTagsSet = new Set(meal.dietaryTags);
     for (const pref of filters.dietaryPreferences) {
@@ -16,6 +34,7 @@ const satisfiesFilters = (meal: Meal, filters: MealFilters): boolean => {
       }
     }
   }
+  
   return true;
 };
 
@@ -113,9 +132,9 @@ export const getWeeklyPlan = async (): Promise<Record<string, Record<string, str
   }
 };
 
-export const fetchMeals = async (filters: MealFilters): Promise<Meal[] | null> => {
+export const fetchMeals = async (filters: MealFilters, currency: Currency = 'INR'): Promise<Meal[] | null> => {
   const allMeals = await getAllMeals();
-  let availableMeals = allMeals.filter(meal => satisfiesFilters(meal, filters));
+  let availableMeals = allMeals.filter(meal => satisfiesFilters(meal, filters, currency));
 
   if (availableMeals.length === 0) {
     return null;
@@ -140,10 +159,11 @@ export const fetchMeals = async (filters: MealFilters): Promise<Meal[] | null> =
 export const fetchNextMeal = async (
   filters: MealFilters,
   currentMealId?: string,
-  excludeMealIds: string[] = []
+  excludeMealIds: string[] = [],
+  currency: Currency = 'INR'
 ): Promise<Meal | null> => {
   const allMeals = await getAllMeals();
-  let potentialMeals = allMeals.filter(meal => satisfiesFilters(meal, filters));
+  let potentialMeals = allMeals.filter(meal => satisfiesFilters(meal, filters, currency));
 
   const allExcludedIds = new Set(excludeMealIds);
   if (currentMealId) {

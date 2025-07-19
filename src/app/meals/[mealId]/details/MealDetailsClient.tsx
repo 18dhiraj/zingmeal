@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, ChefHat, Loader2, ArrowLeft, Tag, Clock, Flame, IndianRupee, ListChecks, Info, Leaf, Vegan, WheatOff, MilkOff, Ban, ListOrdered, Utensils, Heart, Share2, Copy, FileDown } from 'lucide-react';
+import { AlertTriangle, ChefHat, Loader2, ArrowLeft, Tag, Clock, Flame, IndianRupee, DollarSign, Euro, ListChecks, Info, Leaf, Vegan, WheatOff, MilkOff, Ban, ListOrdered, Utensils, Heart, Share2, Copy, FileDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,13 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { saveIndividualMeal, removeIndividualMeal, isIndividualMealSaved } from '@/lib/favoritesService';
 import { fetchMealById } from '@/lib/mealService';
+import { getMealPrice } from '@/utils/priceUtils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import type { Meal } from '@/types';
 import jsPDF from 'jspdf';
 import LoginInfoTip from '@/components/LoginInfo';
 import { trackMealView, trackMealFavorite, trackMealShare, trackMealIngredientsCopy, trackMealPDFDownload } from '@/lib/analytics';
+import { popularityService } from '@/lib/popularityService';
 
 const dietaryIconsMap = {
   vegetarian: Leaf,
@@ -29,11 +32,31 @@ function MealDetailsContent() {
   const { mealId } = useParams<{ mealId: string }>();
   const router = useRouter();
   const { toast } = useToast();
+  const { selectedCurrency, getCurrencyInfo, formatPrice, convertPrice } = useCurrency();
+  const currencyInfo = getCurrencyInfo(selectedCurrency);
 
   const [meal, setMeal] = useState<Meal | null>(null);
   const [loading, setLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+
+  // Get appropriate currency icon based on selected currency
+  const getCurrencyIcon = () => {
+    switch (selectedCurrency) {
+      case 'USD':
+        return DollarSign;
+      case 'EUR':
+        return Euro;
+      case 'INR':
+      default:
+        return IndianRupee;
+    }
+  };
+
+  // Get meal price in selected currency
+  const getMealPriceInCurrency = (meal: Meal) => {
+    return getMealPrice(meal, selectedCurrency, convertPrice);
+  };
 
   useEffect(() => {
     if (!mealId) {
@@ -52,14 +75,25 @@ function MealDetailsContent() {
         }
         setMeal(m);
         setSaved(await isIndividualMealSaved(mealId));
-        // Track meal view
+        // Track meal view for analytics
         trackMealView(mealId, m.name);
+        // Start popularity tracking
+        popularityService.startMealVisit(mealId, m.name);
       } catch {
         setError('Failed to load meal.');
       } finally {
         setLoad(false);
       }
     })();
+  }, [mealId]);
+
+  // Cleanup popularity tracking on unmount or mealId change
+  useEffect(() => {
+    return () => {
+      if (mealId) {
+        popularityService.stopMealVisit(mealId);
+      }
+    };
   }, [mealId]);
 
   const toggleSave = async () => {
@@ -187,7 +221,11 @@ function MealDetailsContent() {
 
         <Separator />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-          <Stat icon={IndianRupee} value={`₹${meal.price.toFixed(2)}`} label="Price" />
+          <Stat 
+            icon={getCurrencyIcon()} 
+            value={formatPrice(getMealPriceInCurrency(meal), selectedCurrency)} 
+            label="Price" 
+          />
           {meal.calories && <Stat icon={Flame} value={`${meal.calories} kcal`} label="Calories" />}
           {meal.prepTime && <Stat icon={Clock} value={meal.prepTime} label="Prep Time" />}
         </div>

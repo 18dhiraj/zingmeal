@@ -1,6 +1,15 @@
 
 export type DietaryPreferenceValue = 'vegetarian' | 'vegan' | 'gluten-free' | 'dairy-free' | 'nut-free';
 
+export type Currency = 'INR' | 'USD' | 'EUR';
+
+export interface CurrencyInfo {
+  code: Currency;
+  symbol: string;
+  name: string;
+  region: string;
+}
+
 export interface DietaryPreference {
   id: DietaryPreferenceValue;
   label: string;
@@ -11,7 +20,8 @@ export interface Meal {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number; // Keeping for backward compatibility
+  pricing: Record<Currency, number>;
   imageUrl: string;
   imagePath?: string;
   dietaryTags: string[];
@@ -23,6 +33,9 @@ export interface Meal {
   createdAt?: any;
   updatedAt?: any;
   html: String;
+  popularity?: number; // Number of unique visits
+  lastVisitedAt?: any; // Timestamp of last visit
+  totalViews?: number; // Total number of views (including repeated)
 }
 
 

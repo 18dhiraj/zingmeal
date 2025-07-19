@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut, Calendar } from 'lucide-react';
+import { LogIn, LogOut, Calendar, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { auth } from '@/firebase';
 import { useRouter } from "next/navigation";
@@ -31,13 +31,13 @@ export default function UserHeader() {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/login" passHref>
+        <Link href="/settings" passHref>
           <Button variant="ghost" size={isMobile ? "icon" : "sm"}>
             <Calendar className="h-5 w-5" />
             {!isMobile && <span className="ml-2">Weekly Plan</span>}
           </Button>
         </Link>
-        <Link href="/login" passHref>
+        <Link href="/settings" passHref>
           <Button variant="ghost" size={isMobile ? "icon" : "sm"}>
             <LogIn className="h-5 w-5" />
             {!isMobile && <span className="ml-2">Login</span>}
@@ -62,6 +62,11 @@ export default function UserHeader() {
         </span>
       )}
 
+      <Link href="/settings" passHref>
+        <Button variant="ghost" size="icon" title="Settings">
+          <Settings className="h-5 w-5" />
+        </Button>
+      </Link>
       <Button variant="ghost" size="icon" onClick={logout} title="Logout">
         <LogOut className="h-5 w-5" />
       </Button>

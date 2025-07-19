@@ -7,6 +7,9 @@ import { ChefHat, Bookmark } from 'lucide-react';
 import UserHeader from '@/components/UserHeader';
 import LayoutClientWrapper from '@/components/LayoutClientWrapper'; // ✅
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { CurrencyProvider } from '@/contexts/CurrencyContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { CurrencyDisplay } from '@/components/CurrencyDisplay';
 
 export const metadata: Metadata = {
   title: 'ZingMeal - Find meals you like!',
@@ -35,6 +38,9 @@ export default function RootLayout({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden sm:block">
+            <CurrencyDisplay />
+          </div>
           <Link href="/favorites" passHref>
             <Button
               variant="ghost"
@@ -65,12 +71,16 @@ export default function RootLayout({
         <GoogleAnalytics />
       </head>
       <body className="font-body antialiased min-h-screen">
-        <div className="flex flex-col min-h-screen">
-          <LayoutClientWrapper header={header}>
-            {children}
-          </LayoutClientWrapper>
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <CurrencyProvider>
+            <div className="flex flex-col min-h-screen">
+              <LayoutClientWrapper header={header}>
+                {children}
+              </LayoutClientWrapper>
+            </div>
+            <Toaster />
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

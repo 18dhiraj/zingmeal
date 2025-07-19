@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,7 @@ import {
 import { MealCard } from "@/components/MealCard";
 import type { SavedMealPlan, Meal, MealFilters } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import LoginInfoTip from "@/components/LoginInfo";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type Props = {
     savedPlans: SavedMealPlan[];
@@ -35,22 +37,27 @@ type Props = {
     onRemoveIndividualMeal: (mealId: string) => void;
 };
 
-const formatFiltersForDisplay = (filters: MealFilters) => (
-    <div className="flex flex-wrap gap-2 items-center">
-        <Badge variant="secondary" className="text-xs py-1 px-2">
-            <Utensils className="w-3 h-3 mr-1" /> {filters.mealsPerDay} meal(s)/day
-        </Badge>
-        <Badge variant="secondary" className="text-xs py-1 px-2">
-            ₹{filters.minPrice} - ₹{filters.maxPrice}
-        </Badge>
-        {filters.dietaryPreferences.length > 0 && (
-            <Badge variant="secondary" className="text-xs py-1 px-2 capitalize">
-                <ListChecks className="w-3 h-3 mr-1" />
-                {filters.dietaryPreferences.join(", ").replace(/-/g, " ")}
+// Component to display filters with currency awareness
+const FilterDisplay = ({ filters }: { filters: MealFilters }) => {
+    const { formatPrice, selectedCurrency } = useCurrency();
+    
+    return (
+        <div className="flex flex-wrap gap-2 items-center">
+            <Badge variant="secondary" className="text-xs py-1 px-2">
+                <Utensils className="w-3 h-3 mr-1" /> {filters.mealsPerDay} meal(s)/day
             </Badge>
-        )}
-    </div>
-);
+            <Badge variant="secondary" className="text-xs py-1 px-2">
+                {formatPrice(filters.minPrice, selectedCurrency)} - {formatPrice(filters.maxPrice, selectedCurrency)}
+            </Badge>
+            {filters.dietaryPreferences.length > 0 && (
+                <Badge variant="secondary" className="text-xs py-1 px-2 capitalize">
+                    <ListChecks className="w-3 h-3 mr-1" />
+                    {filters.dietaryPreferences.join(", ").replace(/-/g, " ")}
+                </Badge>
+            )}
+        </div>
+    );
+};
 
 export default function FavoritePageMarkup({
     savedPlans,
@@ -65,8 +72,14 @@ export default function FavoritePageMarkup({
     return (
         <main className="flex-grow container mx-auto px-4 py-8">
             <div className="flex flex-col items-center w-full space-y-8">
-                <LoginInfoTip />
                 <div className="text-center w-full">
+                    <div className="flex justify-end">
+                        <Link href="/settings">
+                            <Button variant="ghost" size="icon">
+                                <ListChecks className="w-6 h-6" />
+                            </Button>
+                        </Link>
+                    </div>
                     <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary flex items-center justify-center gap-3">
                         <Bookmark className="w-8 h-8 sm:w-10 sm:h-10" />
                         Your Favorites
@@ -113,7 +126,7 @@ export default function FavoritePageMarkup({
                                             </span>
                                         </div>
                                         <CardDescription className="text-sm text-muted-foreground">
-                                            {formatFiltersForDisplay(plan.filters)}
+                                            <FilterDisplay filters={plan.filters} />
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-3 flex-grow">

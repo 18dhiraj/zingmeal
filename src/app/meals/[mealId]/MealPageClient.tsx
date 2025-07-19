@@ -23,6 +23,7 @@ import type {
     MealFilters,
     DietaryPreferenceValue,
 } from '@/types';
+import { popularityService } from '@/lib/popularityService';
 
 const parseFilters = (sp: URLSearchParams): MealFilters => ({
     minPrice: Number(sp.get('minPrice') ?? 5),
@@ -63,12 +64,23 @@ function MealDisplay() {
                 if (!m) throw new Error('not‑found');
                 setAnim('animate-meal-swap-in');
                 setMeal(m);
+                // Start popularity tracking for meal page view
+                popularityService.startMealVisit(mealId, m.name);
             })
             .catch(() => {
                 setError(`Meal with ID ${mealId} not found.`);
             })
             .finally(() => setLoading(false));
     }, [mealId, searchParams]);
+
+    // Cleanup popularity tracking on unmount or mealId change
+    useEffect(() => {
+        return () => {
+            if (mealId) {
+                popularityService.stopMealVisit(mealId);
+            }
+        };
+    }, [mealId]);
 
     const swapMeal = async () => {
         if (!filters || !meal) return;

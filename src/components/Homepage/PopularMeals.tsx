@@ -7,10 +7,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { getMealPrice } from "@/utils/priceUtils";
 
 export const PopularMeals = () => {
     const [popularMeals, setPopularMeals] = useState<Meal[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { selectedCurrency, formatPrice, convertPrice } = useCurrency();
 
     const router = useRouter();
 
@@ -68,7 +71,7 @@ export const PopularMeals = () => {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent to-50% z-10" />
                                     <div className="absolute top-3 right-3 z-20 bg-primary text-white text-xs font-semibold px-2 py-1 rounded-full shadow-md">
-                                        ₹{meal.price}
+                                        {formatPrice(getMealPrice(meal, selectedCurrency, convertPrice), selectedCurrency)}
                                     </div>
                                     {meal.dietaryTags?.length > 0 && (
                                         <div className="absolute top-3 left-3 z-20 bg-white/90 text-xs text-foreground font-medium px-2 py-1 rounded-full shadow-sm">

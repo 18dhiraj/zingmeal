@@ -13,12 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search, Filter, X } from 'lucide-react';
 import Image from 'next/image';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { getMealPrice } from '@/utils/priceUtils';
 
 interface FilterState {
   searchQuery: string;
   priceRange: { min: number; max: number };
   dietaryTags: string[];
-  sortBy: 'newest' | 'price-low' | 'price-high' | 'calories-low' | 'calories-high';
+  sortBy: 'newest' | 'popularity' | 'price-low' | 'price-high' | 'calories-low' | 'calories-high';
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -26,6 +28,7 @@ const ITEMS_PER_PAGE = 12;
 const ExploreClient = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { selectedCurrency, formatPrice, convertPrice } = useCurrency();
   const [allMeals, setAllMeals] = useState<Meal[]>([]);
   const [filteredMeals, setFilteredMeals] = useState<Meal[]>([]);
   const [displayedMeals, setDisplayedMeals] = useState<Meal[]>([]);
@@ -38,10 +41,21 @@ const ExploreClient = () => {
   
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
-    priceRange: { min: 0, max: 1000 },
+    priceRange: { min: 0, max: 1000 }, // Will be updated based on currency
     dietaryTags: [],
     sortBy: 'newest'
   });
+
+  // Update price range when currency changes
+  useEffect(() => {
+    const convertedMin = Math.round(convertPrice(0, 'INR', selectedCurrency));
+    const convertedMax = Math.round(convertPrice(1000, 'INR', selectedCurrency));
+    
+    setFilters(prev => ({
+      ...prev,
+      priceRange: { min: convertedMin, max: convertedMax }
+    }));
+  }, [selectedCurrency, convertPrice]);
 
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
@@ -103,10 +117,11 @@ const ExploreClient = () => {
         );
       }
 
-      // Price filter
-      filtered = filtered.filter(meal => 
-        meal.price >= filters.priceRange.min && meal.price <= filters.priceRange.max
-      );
+      // Price filter (convert to selected currency for filtering)
+      filtered = filtered.filter(meal => {
+        const priceInCurrency = getMealPrice(meal, selectedCurrency, convertPrice);
+        return priceInCurrency >= filters.priceRange.min && priceInCurrency <= filters.priceRange.max;
+      });
 
       // Dietary tags filter
       if (filters.dietaryTags.length > 0) {
@@ -120,10 +135,18 @@ const ExploreClient = () => {
         switch (filters.sortBy) {
           case 'newest':
             return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+          case 'popularity':
+            const popularityA = a.popularity || 0;
+            const popularityB = b.popularity || 0;
+            return popularityB - popularityA; // Higher popularity first
           case 'price-low':
-            return a.price - b.price;
+            const priceA = getMealPrice(a, selectedCurrency, convertPrice);
+            const priceB = getMealPrice(b, selectedCurrency, convertPrice);
+            return priceA - priceB;
           case 'price-high':
-            return b.price - a.price;
+            const priceAHigh = getMealPrice(a, selectedCurrency, convertPrice);
+            const priceBHigh = getMealPrice(b, selectedCurrency, convertPrice);
+            return priceBHigh - priceAHigh;
           case 'calories-low':
             return a.calories - b.calories;
           case 'calories-high':
@@ -203,9 +226,12 @@ const ExploreClient = () => {
   };
 
   const clearFilters = () => {
+    const convertedMin = Math.round(convertPrice(0, 'INR', selectedCurrency));
+    const convertedMax = Math.round(convertPrice(1000, 'INR', selectedCurrency));
+    
     setFilters({
       searchQuery: '',
-      priceRange: { min: 0, max: 1000 },
+      priceRange: { min: convertedMin, max: convertedMax },
       dietaryTags: [],
       sortBy: 'newest'
     });
@@ -296,6 +322,7 @@ const ExploreClient = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="popularity">Most Popular</SelectItem>
                       <SelectItem value="price-low">Price: Low to High</SelectItem>
                       <SelectItem value="price-high">Price: High to Low</SelectItem>
                       <SelectItem value="calories-low">Calories: Low to High</SelectItem>
@@ -382,7 +409,7 @@ const ExploreClient = () => {
                     className="object-cover"
                   />
                   <div className="absolute top-2 right-2 bg-primary text-white px-2 py-1 rounded text-sm font-semibold">
-                    ₹{meal.price}
+                    {formatPrice(getMealPrice(meal, selectedCurrency, convertPrice), selectedCurrency)}
                   </div>
                   {meal.dietaryTags.length > 0 && (
                     <div className="absolute top-2 left-2 bg-white/90 text-xs px-2 py-1 rounded">

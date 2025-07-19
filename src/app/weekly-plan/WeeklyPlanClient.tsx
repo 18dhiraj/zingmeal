@@ -16,6 +16,8 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/firebase';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { getMealPrice } from '@/utils/priceUtils';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const mealsPerDay = ['Breakfast', 'Lunch', 'Dinner'];
@@ -36,6 +38,8 @@ type Props = { allMeals: Meal[] };
 export default function WeeklyPlanClient({ allMeals }: Props) {
   const { toast } = useToast();
   const router = useRouter();
+  const { selectedCurrency, getCurrencyInfo, convertPrice } = useCurrency();
+  const currencyInfo = getCurrencyInfo(selectedCurrency);
 
   const [mealPlan, setMealPlan] = useState(makeEmptyPlan);
   const [minPrice, setMinPrice] = useState('');
@@ -76,8 +80,9 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
       const maxC = toNum(maxCalories);
 
       const filtered = allMeals.filter(meal => {
-        if (minP !== undefined && meal.price < minP) return false;
-        if (maxP !== undefined && meal.price > maxP) return false;
+        const mealPriceInCurrency = getMealPrice(meal, selectedCurrency, convertPrice);
+        if (minP !== undefined && mealPriceInCurrency < minP) return false;
+        if (maxP !== undefined && mealPriceInCurrency > maxP) return false;
         if (minC !== undefined && meal.calories < minC) return false;
         if (maxC !== undefined && meal.calories > maxC) return false;
         if (selectedTags.length &&
@@ -92,7 +97,7 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
       }
       return filtered;
     },
-    [allMeals, minPrice, maxPrice, minCalories, maxCalories, selectedTags]
+    [allMeals, minPrice, maxPrice, minCalories, maxCalories, selectedTags, selectedCurrency, convertPrice]
   );
 
   const exportMealPlanToPDF = () => {
@@ -184,8 +189,8 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
         <h2 className="text-base font-medium text-primary">Filter Meals</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          <Input type="number" placeholder="Min ₹" value={minPrice} onChange={e => setMinPrice(e.target.value)} />
-          <Input type="number" placeholder="Max ₹" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
+          <Input type="number" placeholder={`Min ${currencyInfo.symbol}`} value={minPrice} onChange={e => setMinPrice(e.target.value)} />
+          <Input type="number" placeholder={`Max ${currencyInfo.symbol}`} value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
           <Input type="number" placeholder="Min Cal" value={minCalories} onChange={e => setMinCalories(e.target.value)} />
           <Input type="number" placeholder="Max Cal" value={maxCalories} onChange={e => setMaxCalories(e.target.value)} />
         </div>

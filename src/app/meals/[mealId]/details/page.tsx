@@ -11,7 +11,8 @@ export async function generateMetadata(
   { params }: Props,
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const meal = await fetchMealById(params.mealId);
+  const { mealId } = await params;
+  const meal = await fetchMealById(mealId);
 
   if (!meal) {
     return {

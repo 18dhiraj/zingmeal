@@ -10,9 +10,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { DietaryPreference, MealFilters } from '@/types';
-import { Utensils, IndianRupee, Beef } from 'lucide-react';
+import { Utensils, IndianRupee, DollarSign, Euro, Beef } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackMealPlanGeneration } from '@/lib/analytics';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const normalize = (str: string) => str.trim().toLowerCase().replace(/\s+/g, '-');
 
@@ -36,29 +37,32 @@ const mealsPerDayOptions = [
   { value: "5", label: "5 Meals" },
 ];
 
-const formSchema = z.object({
-  priceRange: z
-    .array(z.number())
-    .length(2)
-    .default([50, 2000])                      // new default within the allowed bounds
-    .refine(
-      (data) => data[0] >= 50 && data[1] <= 2000,
-      {
-        message: "Price must be between ₹50 and ₹2000.",
-      }
-    )
-    .refine(
-      (data) => data[0] <= data[1],
-      {
-        message: "Min price cannot be greater than max price.",
-        path: ["priceRange"],
-      }
-    ),
-  dietaryPreferences: z.array(z.string()).default([]),
-  mealsPerDay: z.coerce.number().min(1).max(5).default(1),
-});
+// Create dynamic schema based on currency
+const createFormSchema = (minValue: number, maxValue: number, currencySymbol: string) => {
+  return z.object({
+    priceRange: z
+      .array(z.number())
+      .length(2)
+      .default([minValue, maxValue])
+      .refine(
+        (data) => data[0] >= minValue && data[1] <= maxValue,
+        {
+          message: `Price must be between ${currencySymbol}${minValue} and ${currencySymbol}${maxValue}.`,
+        }
+      )
+      .refine(
+        (data) => data[0] <= data[1],
+        {
+          message: "Min price cannot be greater than max price.",
+          path: ["priceRange"],
+        }
+      ),
+    dietaryPreferences: z.array(z.string()).default([]),
+    mealsPerDay: z.coerce.number().min(1).max(5).default(1),
+  });
+};
 
-type MealFinderFormValues = z.infer<typeof formSchema>;
+// We'll define the type after we create the schema instance
 
 interface MealFinderFormProps {
   onSubmit: (data: MealFilters) => void;
@@ -66,28 +70,61 @@ interface MealFinderFormProps {
 }
 
 export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) {
+  const { selectedCurrency, getCurrencyInfo, formatPrice, convertPrice } = useCurrency();
+  const currencyInfo = getCurrencyInfo(selectedCurrency);
+
+  // Get appropriate icon based on currency
+  const CurrencyIcon = selectedCurrency === 'USD' ? DollarSign :
+    selectedCurrency === 'EUR' ? Euro : IndianRupee;
+
+  // Convert INR base values to selected currency
+  const getConvertedValue = (inrValue: number) => {
+    if (selectedCurrency === 'INR') {
+      return Math.round(inrValue);
+    }
+    return Math.round(convertPrice(inrValue, 'INR', selectedCurrency));
+  };
+
+  // Define currency-aware min/max values
+  const minValue = getConvertedValue(50);
+  const maxValue = getConvertedValue(2000);
+  const defaultMaxValue = getConvertedValue(1000);
+
+  // Create the form schema with current currency values
+  const formSchema = createFormSchema(minValue, maxValue, currencyInfo.symbol);
+  type MealFinderFormValues = z.infer<typeof formSchema>;
+
   const form = useForm<MealFinderFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      priceRange: [50, 1000],
+      priceRange: [minValue, defaultMaxValue],
       dietaryPreferences: [],
       mealsPerDay: 1,
     },
   });
 
   const handleSubmit = (values: MealFinderFormValues) => {
+    // Convert prices back to INR for backend processing
+    const minPriceInINR = selectedCurrency === 'INR' ? 
+      values.priceRange[0] : 
+      Math.round(convertPrice(values.priceRange[0], selectedCurrency, 'INR'));
+    
+    const maxPriceInINR = selectedCurrency === 'INR' ? 
+      values.priceRange[1] : 
+      Math.round(convertPrice(values.priceRange[1], selectedCurrency, 'INR'));
+
     const mealFiltersSubmit: MealFilters = {
-      minPrice: values.priceRange[0],
-      maxPrice: values.priceRange[1],
+      minPrice: minPriceInINR,
+      maxPrice: maxPriceInINR,
       dietaryPreferences: values.dietaryPreferences as MealFilters['dietaryPreferences'],
       mealsPerDay: values.mealsPerDay,
     };
-    
+
     // Track meal plan generation
     trackMealPlanGeneration(
-      `${values.mealsPerDay} meals - ₹${values.priceRange[0]}-₹${values.priceRange[1]} - ${values.dietaryPreferences.join(', ') || 'No preferences'}`
+      `${values.mealsPerDay} meals - ${formatPrice(values.priceRange[0], selectedCurrency)}-${formatPrice(values.priceRange[1], selectedCurrency)} - ${values.dietaryPreferences.join(', ') || 'No preferences'} - ${selectedCurrency}`
     );
-    
+
     onSubmit(mealFiltersSubmit);
   };
 
@@ -107,11 +144,11 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
               <FormItem>
                 <FormLabel className="text-lg font-medium">Price Range</FormLabel>
                 <div className="flex items-center space-x-4">
-                  <IndianRupee className="h-5 w-5 text-muted-foreground" />
+                  <CurrencyIcon className="h-5 w-5 text-muted-foreground" />
                   <FormControl>
                     <Slider
-                      min={50}
-                      max={2000}
+                      min={minValue}
+                      max={maxValue}
                       step={1}
                       value={field.value}
                       onValueChange={field.onChange}
@@ -119,8 +156,8 @@ export function MealFinderForm({ onSubmit, isSubmitting }: MealFinderFormProps) 
                       aria-label="Price range slider"
                     />
                   </FormControl>
-                  <span className="text-lg font-semibold text-primary w-52 text-right">
-                    ₹{field.value[0]} - ₹{field.value[1]}
+                  <span className="text-sm font-semibold text-primary w-52 text-right">
+                    {formatPrice(field.value[0], selectedCurrency)} - {formatPrice(field.value[1], selectedCurrency)}
                   </span>
                 </div>
                 <FormDescription>Set the minimum and maximum price per meal.</FormDescription>

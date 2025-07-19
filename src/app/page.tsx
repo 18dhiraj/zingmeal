@@ -63,6 +63,10 @@ export default function HomePage() {
                             </li>
                             <li className="flex items-start gap-3">
                                 <span className="bg-primary text-white rounded-full w-6 h-6 min-w-6 min-h-6 flex items-center justify-center text-sm font-bold">✓</span>
+                                <span><strong>Multi-Currency Support:</strong> View prices in INR, USD, or EUR with real-time conversion.</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="bg-primary text-white rounded-full w-6 h-6 min-w-6 min-h-6 flex items-center justify-center text-sm font-bold">✓</span>
                                 <span><strong>Save Meals & Plans:</strong> Keep your favorites synced across devices.</span>
                             </li>
                         </ul>
@@ -98,7 +102,6 @@ export default function HomePage() {
                         >
                             Contact
                         </a>
-
                     </div>
                 </div>
             </footer>

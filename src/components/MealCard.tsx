@@ -7,9 +7,11 @@ import type { Meal } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Leaf, Vegan, WheatOff, MilkOff, Ban, Clock, Flame, IndianRupee , Eye, RefreshCw, Loader2 } from 'lucide-react';
+import { Leaf, Vegan, WheatOff, MilkOff, Ban, Clock, Flame, IndianRupee, DollarSign, Euro, Eye, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackMealView } from '@/lib/analytics';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { getMealPrice } from '@/utils/priceUtils';
 
 interface MealCardProps {
   meal: Meal;
@@ -39,6 +41,7 @@ export function MealCard({
   animationClass, 
   showSwapButton = true,
 }: MealCardProps) {
+  const { selectedCurrency, formatPrice, getCurrencyInfo, convertPrice } = useCurrency();
   
   const handleSwapClick = () => {
     if (onSwapMeal) {
@@ -52,6 +55,12 @@ export function MealCard({
   };
 
   const currentIsSwapping = isSwappingThisCard || isSwapping;
+  const price = getMealPrice(meal, selectedCurrency, convertPrice);
+  const currencyInfo = getCurrencyInfo(selectedCurrency);
+  
+  // Get appropriate icon based on currency
+  const CurrencyIcon = selectedCurrency === 'USD' ? DollarSign : 
+                      selectedCurrency === 'EUR' ? Euro : IndianRupee;
 
   return (
     <Card className={cn("w-full overflow-hidden flex flex-col border-0 shadow-0", animationClass)}>
@@ -89,8 +98,8 @@ export function MealCard({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2 text-sm">
           <div className="flex items-center gap-2">
-            <IndianRupee  className="w-5 h-5 text-accent" />
-            <span className="font-medium">₹{meal.price.toFixed(2)}</span>
+            <CurrencyIcon className="w-5 h-5 text-accent" />
+            <span className="font-medium">{formatPrice(price, selectedCurrency)}</span>
           </div>
           {meal.calories && (
             <div className="flex items-center gap-2">

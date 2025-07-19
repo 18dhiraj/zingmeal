@@ -6,16 +6,18 @@ import { MealFinderForm } from './MealFinderForm';
 import type { MealFilters } from '@/types';
 import { fetchMeals } from '@/lib/mealService';
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function MealFinderClient() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { selectedCurrency } = useCurrency();
 
   const handleFormSubmit = async (data: MealFilters) => {
     setIsSubmitting(true);
     try {
-      const mealsArray = await fetchMeals(data);
+      const mealsArray = await fetchMeals(data, selectedCurrency);
 
       if ( mealsArray && mealsArray?.length > 0) {
         const mealIds = mealsArray.map(m => m.id).join(',');
