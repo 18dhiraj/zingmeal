@@ -18,6 +18,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getMealPrice } from '@/utils/priceUtils';
+import { SearchableCombobox } from '@/components/ui/searchable-combobox';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const mealsPerDay = ['Breakfast', 'Lunch', 'Dinner'];
@@ -210,7 +211,13 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
       </section>
 
       <div className="overflow-x-auto border border-border rounded-md">
-        <table className="min-w-full text-sm bg-white dark:bg-background">
+        <table className="min-w-full text-sm bg-white dark:bg-background table-fixed">
+          <colgroup>
+            <col className="w-32" />
+            <col className="w-56" />
+            <col className="w-56" />
+            <col className="w-56" />
+          </colgroup>
           <thead className="bg-muted text-muted-foreground">
             <tr>
               <th className="p-3 text-left font-semibold">Day</th>
@@ -225,21 +232,15 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
                 <td className="p-3 font-medium text-primary">{day}</td>
                 {mealsPerDay.map(type => (
                   <td key={type} className="p-2">
-                    <select
-                      value={mealPlan[day][type]}
-                      onChange={e => setMealPlan(p => ({
+                    <SearchableCombobox
+                      options={filterMealList(mealPlan[day][type]).map(meal => ({ id: meal.id, name: meal.name }))}
+                      selected={mealPlan[day][type]}
+                      onSelect={id => setMealPlan(p => ({
                         ...p,
-                        [day]: { ...p[day], [type]: e.target.value },
+                        [day]: { ...p[day], [type]: id },
                       }))}
-                      className="w-full px-2 py-1 rounded-md border border-border bg-background text-sm"
-                    >
-                      <option value="">Select meal</option>
-                      {filterMealList(mealPlan[day][type]).map(meal => (
-                        <option key={meal.id} value={meal.id}>
-                          {meal.name}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Select meal"
+                    />
                   </td>
                 ))}
               </tr>
