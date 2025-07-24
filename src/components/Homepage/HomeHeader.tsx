@@ -33,7 +33,7 @@ const HomeHeader = () => {
             <div className="flex flex-wrap justify-between items-center gap-y-2">
                 <div className="flex items-center gap-2">
                     <ChefHat className="w-6 h-6 text-white" />
-                    <span className="text-xl font-semibold tracking-wide">ZingMeal</span>
+                    <span className="hidden sm:inline text-xl font-semibold tracking-wide">ZingMeal</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 justify-end w-auto sm:w-auto">
@@ -55,7 +55,7 @@ const HomeHeader = () => {
                     >
                         <Settings className="h-5 w-5" />
                     </Button>
-                    
+
                     <Button
                         variant="ghost"
                         size="sm"
