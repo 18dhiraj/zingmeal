@@ -1,5 +1,5 @@
 import MealPageClient from './MealPageClient';
-import { fetchMealById } from '@/lib/mealService';
+import { fetchMealById, fetchMealByslug } from '@/lib/mealService';
 import type { Metadata, ResolvingMetadata } from 'next';
 
 type Props = {
@@ -11,7 +11,8 @@ export async function generateMetadata(
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { mealId } = await params;
-  const meal = await fetchMealById(mealId);
+  // const meal = await fetchMealById(mealId);
+  const meal = await fetchMealByslug(mealId);
 
   if (!meal) {
     return {

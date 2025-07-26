@@ -31,7 +31,7 @@ export default function HomePage() {
 
             <section id="popular-meals-section" className="bg-background py-16 px-4 sm:px-8">
                 <div className="max-w-6xl mx-auto text-center mb-10">
-                    <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-2">Newest Meals</h2>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-2">Popular Meals</h2>
                     <p className="text-muted-foreground">Loved by users and highly rated</p>
                 </div>
                 <PopularMeals />
@@ -87,7 +87,7 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-            <footer className="bg-card border-t mt-10">
+            <footer className="bg-card border-t">
                 <div className="max-w-6xl mx-auto px-4 py-10 sm:px-8 flex flex-col sm:flex-row justify-between items-center gap-6 text-muted-foreground text-sm">
                     <div className="text-center sm:text-left">
                         <p>© {new Date().getFullYear()} ZingMeal. All rights reserved.</p>

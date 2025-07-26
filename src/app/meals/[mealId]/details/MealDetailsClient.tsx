@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { saveIndividualMeal, removeIndividualMeal, isIndividualMealSaved } from '@/lib/favoritesService';
-import { fetchMealById } from '@/lib/mealService';
+import { fetchMealById, fetchMealByslug } from '@/lib/mealService';
 import { getMealPrice } from '@/utils/priceUtils';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import type { Meal } from '@/types';
@@ -68,7 +68,7 @@ function MealDetailsContent() {
     (async () => {
       try {
         setLoad(true);
-        const m = await fetchMealById(mealId);
+        const m = await fetchMealByslug(mealId);
         if (!m) {
           setError(`Meal with ID ${mealId} not found.`);
           return;

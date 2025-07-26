@@ -116,7 +116,7 @@ export function MealCard({
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 pt-0 p-6 mt-auto">
-        <Link href={`/meals/${meal.id}/details`} passHref className="w-full">
+        <Link href={`/meals/${meal?.slug  || meal.id}/details`} passHref className="w-full">
           <Button variant="outline" className="w-full" onClick={handleDetailsClick}>
             <Eye className="mr-2 h-4 w-4" />
             See More Details

@@ -36,6 +36,7 @@ export interface Meal {
   popularity?: number; // Number of unique visits
   lastVisitedAt?: any; // Timestamp of last visit
   totalViews?: number; // Total number of views (including repeated)
+  slug?: String;
 }
 
 

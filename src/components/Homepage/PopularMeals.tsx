@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Meal } from "@/types"; // Update path based on your project
-import { fetchNewMeals } from "../../lib/mealService"; // Replace with your actual fetch function
+import { fetchNewMeals ,fetchPopularMeals } from "../../lib/mealService"; // Replace with your actual fetch function
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -20,7 +20,7 @@ export const PopularMeals = () => {
     useEffect(() => {
         const loadPopularMeals = async () => {
             try {
-                const meals = await fetchNewMeals();
+                const meals = await fetchPopularMeals();
                 setPopularMeals(meals);
             } catch (error) {
                 console.error("Failed to load popular meals:", error);
@@ -51,7 +51,7 @@ export const PopularMeals = () => {
                     : popularMeals.map((meal) => (
                         <Card
                             key={meal.id}
-                            onClick={() => router.push(`/meals/${meal.id}/details`)}
+                            onClick={() => router.push(`/meals/${meal?.slug || meal.id}/details`)}
                             className="rounded-2xl overflow-hidden border border-border bg-white dark:bg-muted/30 shadow-sm hover:shadow-lg transition-all cursor-pointer"
                         >
                             {/* Image with price badge */}

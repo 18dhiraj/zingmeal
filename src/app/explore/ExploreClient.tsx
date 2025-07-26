@@ -38,7 +38,7 @@ const ExploreClient = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
     priceRange: { min: 0, max: 1000 }, // Will be updated based on currency
@@ -50,7 +50,7 @@ const ExploreClient = () => {
   useEffect(() => {
     const convertedMin = Math.round(convertPrice(0, 'INR', selectedCurrency));
     const convertedMax = Math.round(convertPrice(1000, 'INR', selectedCurrency));
-    
+
     setFilters(prev => ({
       ...prev,
       priceRange: { min: convertedMin, max: convertedMax }
@@ -73,21 +73,21 @@ const ExploreClient = () => {
       try {
         setLoading(true);
         const meals = await getMeals();
-        
+
         // Remove duplicates based on meal ID
-        const uniqueMeals = meals.filter((meal, index, self) => 
+        const uniqueMeals = meals.filter((meal, index, self) =>
           index === self.findIndex(m => m.id === meal.id)
         );
-        
+
         setAllMeals(uniqueMeals);
-        
+
         // Extract unique dietary tags
         const tags = new Set<string>();
         uniqueMeals.forEach(meal => {
           meal.dietaryTags.forEach(tag => tags.add(tag));
         });
         setAvailableTags(Array.from(tags));
-        
+
         // Set initial filtered meals
         setFilteredMeals(uniqueMeals);
         setDisplayedMeals(uniqueMeals.slice(0, ITEMS_PER_PAGE));
@@ -110,7 +110,7 @@ const ExploreClient = () => {
       // Search filter
       if (filters.searchQuery.trim()) {
         const query = filters.searchQuery.toLowerCase();
-        filtered = filtered.filter(meal => 
+        filtered = filtered.filter(meal =>
           meal.name.toLowerCase().includes(query) ||
           meal.description.toLowerCase().includes(query) ||
           meal.ingredients.some(ingredient => ingredient.toLowerCase().includes(query))
@@ -125,7 +125,7 @@ const ExploreClient = () => {
 
       // Dietary tags filter
       if (filters.dietaryTags.length > 0) {
-        filtered = filtered.filter(meal => 
+        filtered = filtered.filter(meal =>
           filters.dietaryTags.every(tag => meal.dietaryTags.includes(tag))
         );
       }
@@ -157,10 +157,10 @@ const ExploreClient = () => {
       });
 
       // Remove duplicates based on meal ID
-      const uniqueFiltered = filtered.filter((meal, index, self) => 
+      const uniqueFiltered = filtered.filter((meal, index, self) =>
         index === self.findIndex(m => m.id === meal.id)
       );
-      
+
       setFilteredMeals(uniqueFiltered);
       setDisplayedMeals(uniqueFiltered.slice(0, ITEMS_PER_PAGE));
       setCurrentPage(1);
@@ -178,9 +178,9 @@ const ExploreClient = () => {
     const nextPage = currentPage + 1;
     const startIndex = (nextPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    
+
     const newMeals = filteredMeals.slice(startIndex, endIndex);
-    
+
     if (newMeals.length > 0) {
       setDisplayedMeals(prev => {
         // Create a Set of existing meal IDs to prevent duplicates
@@ -193,7 +193,7 @@ const ExploreClient = () => {
     } else {
       setHasMore(false);
     }
-    
+
     setLoadingMore(false);
   }, [filteredMeals, currentPage, loadingMore, hasMore]);
 
@@ -228,7 +228,7 @@ const ExploreClient = () => {
   const clearFilters = () => {
     const convertedMin = Math.round(convertPrice(0, 'INR', selectedCurrency));
     const convertedMax = Math.round(convertPrice(1000, 'INR', selectedCurrency));
-    
+
     setFilters({
       searchQuery: '',
       priceRange: { min: convertedMin, max: convertedMax },
@@ -237,8 +237,13 @@ const ExploreClient = () => {
     });
   };
 
-  const handleMealClick = (mealId: string) => {
-    router.push(`/meals/${mealId}/details`);
+  const handleMealClick = (meal: Meal) => {
+    if (meal.slug) {
+      router.push(`/meals/${meal.slug}/details`);
+
+    } else {
+      router.push(`/meals/${meal.id}/details`);
+    }
   };
 
   if (loading) {
@@ -277,7 +282,7 @@ const ExploreClient = () => {
                 className="pl-10 pr-4 py-2 text-lg"
               />
             </div>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -292,7 +297,7 @@ const ExploreClient = () => {
                   </Badge>
                 )}
               </Button>
-              
+
               {(filters.dietaryTags.length > 0 || filters.searchQuery) && (
                 <Button
                   variant="ghost"
@@ -386,11 +391,11 @@ const ExploreClient = () => {
         </div>
 
         {/* Results Count */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <p className="text-muted-foreground">
             Showing {displayedMeals.length} of {filteredMeals.length} meals
           </p>
-        </div>
+        </div> */}
 
         {/* Meals Grid */}
         {displayedMeals.length > 0 ? (
@@ -399,7 +404,7 @@ const ExploreClient = () => {
               <Card
                 key={meal.id}
                 className="cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
-                onClick={() => handleMealClick(meal.id)}
+                onClick={() => handleMealClick(meal)}
               >
                 <div className="relative h-48">
                   <Image

@@ -73,13 +73,6 @@ export default function FavoritePageMarkup({
         <main className="flex-grow container mx-auto px-4 py-8">
             <div className="flex flex-col items-center w-full space-y-8">
                 <div className="text-center w-full">
-                    <div className="flex justify-end">
-                        <Link href="/settings">
-                            <Button variant="ghost" size="icon">
-                                <ListChecks className="w-6 h-6" />
-                            </Button>
-                        </Link>
-                    </div>
                     <h1 className="text-3xl sm:text-4xl font-headline font-bold text-primary flex items-center justify-center gap-3">
                         <Bookmark className="w-8 h-8 sm:w-10 sm:h-10" />
                         Your Favorites

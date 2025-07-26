@@ -64,6 +64,29 @@ export const fetchNewMeals = async (): Promise<Meal[]> => {
   });
 };
 
+
+export const fetchPopularMeals = async (): Promise<Meal[]> => {
+  const mealsRef = collection(db, 'meals');
+  const q = query(
+    mealsRef,
+    where('status', '==', 1),
+    orderBy('popularity', 'desc'),
+    limit(6)
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id,
+      ...data,
+      createdAt: toISO(data.createdAt),
+      updatedAt: toISO(data.updatedAt),
+    } as Meal;
+  });
+};
+
+
 const getAllMeals = async (): Promise<Meal[]> => {
   const snap = await getDocs(collection(db, 'meals'));
 
@@ -179,6 +202,12 @@ export const fetchNextMeal = async (
 export const fetchMealById = async (id: string): Promise<Meal | null> => {
   const allMeals = await getAllMeals();
   return allMeals.find(m => m.id === id) || null;
+};
+
+export const fetchMealByslug = async (id: string): Promise<Meal | null> => {
+  // alert(id)
+  const allMeals = await getAllMeals();
+  return allMeals.find(m => (m.slug === id || m.id === id)) || null;
 };
 
 export const fetchMealsByIds = async (ids: string[]): Promise<Meal[]> => {

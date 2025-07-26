@@ -26,7 +26,7 @@ const HeroSection = () => {
                 </button>
                 <a href="#popular-meals-section"
                     className="block w-full text-center text-sm text-white/80 hover:text-white transition"
-                >↓ See Newest Meals</a>
+                >↓ See Popular Meals</a>
             </div>
         </div>
     )
