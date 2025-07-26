@@ -23,30 +23,41 @@ export const SearchableCombobox: React.FC<SearchableComboboxProps> = ({
   placeholder,
 }) => {
   const [query, setQuery] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+
   const filteredOptions = options.filter((option) =>
     option.name.toLowerCase().includes(query.toLowerCase())
   );
 
+  const handleSelect = (id: string) => {
+    onSelect(id);
+    setOpen(false); // close popover after selection
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div
           className="w-full h-10 relative border border-border rounded-md cursor-pointer px-2 py-1 bg-background text-sm flex items-center justify-between"
           role="button"
+          tabIndex={0}
         >
           <span className="truncate flex-1 text-left">
-            {options.find((option) => option.id === selected)?.name ||
-              'Select meal'}
+            {options.find((option) => option.id === selected)?.name || 'Select meal'}
           </span>
           <Search className="h-4 w-4 opacity-50 flex-shrink-0 ml-2" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-2" style={{ width: 'var(--radix-popover-trigger-width)' }}>
+      <PopoverContent
+        className="p-2"
+        style={{ width: 'var(--radix-popover-trigger-width)' }}
+      >
         <Input
           placeholder={placeholder || 'Search...'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="mb-2"
+          autoFocus
         />
         <ul className="max-h-40 overflow-auto">
           {filteredOptions.map((option) => (
@@ -56,10 +67,12 @@ export const SearchableCombobox: React.FC<SearchableComboboxProps> = ({
                 'p-2 flex items-center cursor-pointer hover:bg-muted rounded-sm',
                 option.id === selected && 'bg-muted'
               )}
-              onClick={() => onSelect(option.id)}
+              onClick={() => handleSelect(option.id)}
             >
               <span className="mr-2 flex-1 truncate">{option.name}</span>
-              {option.id === selected && <Check className="h-4 w-4 ml-auto flex-shrink-0" />}
+              {option.id === selected && (
+                <Check className="h-4 w-4 ml-auto flex-shrink-0" />
+              )}
             </li>
           ))}
         </ul>
@@ -67,4 +80,3 @@ export const SearchableCombobox: React.FC<SearchableComboboxProps> = ({
     </Popover>
   );
 };
-

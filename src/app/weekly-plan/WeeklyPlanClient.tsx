@@ -102,9 +102,48 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
   );
 
   const exportMealPlanToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16).text('Weekly Meal Plan', 14, 20);
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4',
+    });
 
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // --- Add Title ---
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(32);
+    doc.setTextColor(40, 40, 40); // Dark gray
+    const title = 'ZINGMEAL';
+    const titleWidth = doc.getTextWidth(title);
+    doc.text(title, (pageWidth - titleWidth) / 2, 40);
+
+    // --- Add Subheader ---
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(16);
+    doc.setTextColor(120, 120, 120); // Light gray
+    const subheader = 'zingmeal.com';
+    const subheaderWidth = doc.getTextWidth(subheader);
+    doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
+
+    // --- Draw repeating watermark "ZingMeal" in background ---
+    const watermarkText = 'ZingMeal';
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(230, 230, 230); // very light gray
+    const angle = 45;
+    const stepX = 150; // horizontal spacing between watermarks
+    const stepY = 140; // vertical spacing between watermarks
+
+    // Place watermark all over the page
+    for (let x = -pageHeight; x < pageWidth + pageHeight; x += stepX) {
+      for (let y = 0; y < pageHeight + pageWidth; y += stepY) {
+        doc.text(watermarkText, x, y, { angle });
+      }
+    }
+
+    // --- Prepare your table headers and rows as before ---
     const headers = ['Day', ...mealsPerDay];
     const rows = daysOfWeek.map(day => {
       const row: any[] = [day];
@@ -113,33 +152,37 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
         const meal = mealsMap[id];
         row.push(
           meal?.name
-            ? { content: meal.name, link: `https://zingmeal.com/meals/${meal.id}/details` }
+            ? { content: meal.name, link: `https://zingmeal.com/meals/${meal?.slug || meal.id}/details` }
             : 'Not Assigned'
         );
       });
       return row;
     });
 
+    // --- Draw the table starting lower to avoid overlapping title and watermark top area ---
     autoTable(doc, {
-      startY: 30,
+      startY: 80, // shift down to show title and subheader clearly
       head: [headers],
       body: rows,
       didDrawCell: d => {
         const cell: any = d.cell.raw;
-        if (typeof cell === 'object' && typeof cell.link == 'string') {
+        if (typeof cell === 'object' && typeof cell.link === 'string') {
           doc.setTextColor(0, 0, 255);
           doc.textWithLink(
             cell.content,
-            d.cell.x + 1.8,
-            d.cell.y + d.cell.height / 2 + 0.9,
+            d.cell.x + 4.8,
+            d.cell.y + d.cell.height / 2 + 2.8,
             { url: cell.link }
           );
-          doc.setTextColor(0, 0, 0);
+          doc.setTextColor(0, 0, 0); // reset text color
         }
       },
     });
+
+    // --- Save the PDF ---
     doc.save('meal-plan.pdf');
   };
+
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">

@@ -21,8 +21,8 @@ import { trackMealView, trackMealFavorite, trackMealShare, trackMealIngredientsC
 import { popularityService } from '@/lib/popularityService';
 
 const dietaryIconsMap = {
-  vegetarian: Leaf,
-  vegan: Vegan,
+  'vegetarian': Leaf,
+  'vegan': Vegan,
   'gluten-free': WheatOff,
   'dairy-free': MilkOff,
   'nut-free': Ban,
@@ -118,7 +118,7 @@ function MealDetailsContent() {
     const url = location.href;
     // Track share event
     trackMealShare(meal.id, meal.name);
-    
+
     if (navigator.share) {
       try { await navigator.share({ title: meal?.name, url }); } catch { }
     } else {
@@ -145,20 +145,157 @@ function MealDetailsContent() {
 
   const downloadPDF = () => {
     if (!meal) return;
-    // Track PDF download
+
     trackMealPDFDownload(meal.id, meal.name);
-    
-    const doc = new jsPDF();
-    doc.setFontSize(18).text(meal.name, 10, 15);
-    doc.setFontSize(14).text('Ingredients:', 10, 30);
-    doc.setFontSize(12);
-    meal.ingredients?.forEach((ing, i) => doc.text(`- ${ing}`, 12, 40 + i * 8));
-    let y = 40 + (meal.ingredients?.length ?? 0) * 8 + 10;
-    doc.setFontSize(14).text('Steps:', 10, y);
-    doc.setFontSize(12);
-    meal.steps?.forEach((s, i) => doc.text(`${i + 1}. ${s}`, 12, y + 10 + i * 8));
-    doc.save(`${meal.name}.pdf`);
+
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4',
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // === TITLE ("ZINGMEAL") at the top, large and bold ===
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(32);
+    doc.setTextColor(40, 40, 40); // strong dark gray/black
+    let title = 'ZINGMEAL';
+    let titleWidth = doc.getTextWidth(title);
+    doc.text(title, (pageWidth - titleWidth) / 2, 40);
+
+    // === Subheader ("zingmeal.com") directly below, smaller, lighter ===
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(16);
+    doc.setTextColor(120, 120, 120); // lighter gray
+    let subheader = 'zingmeal.com';
+    let subheaderWidth = doc.getTextWidth(subheader);
+    doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
+
+    // === Draw repeating "ZingMeal" watermark all over the page ===
+    const watermarkText = 'ZingMeal';
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(230, 230, 230); // very light gray for watermark
+    const angle = 45;
+    const stepX = 150; // horizontal spacing between watermarks
+    const stepY = 140; // vertical spacing between watermarks
+    for (let x = -pageHeight; x < pageWidth + pageHeight; x += stepX) {
+      for (let y = 0; y < pageHeight + pageWidth; y += stepY) {
+        doc.text(watermarkText, x, y, { angle });
+      }
+    }
+
+    // === Reset text settings for actual content; start layout slightly lower after headings ===
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(meal.name, 40, 95); // Adjusted down so it doesn't overlap headers
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Ingredients:', 40, 120);
+
+    let y = 140;
+    const lineHeight = 18;
+    meal.ingredients?.forEach((ing) => {
+      if (y > pageHeight - 80) {
+        doc.addPage();
+        // Add title/subheader on each new page for branding/consistency
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(32);
+        doc.setTextColor(40, 40, 40);
+        doc.text(title, (pageWidth - titleWidth) / 2, 40);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(16);
+        doc.setTextColor(120, 120, 120);
+        doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
+
+        // Watermark all over new page as before
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(230, 230, 230);
+        for (let x = -pageHeight; x < pageWidth + pageHeight; x += stepX) {
+          for (let yw = 0; yw < pageHeight + pageWidth; yw += stepY) {
+            doc.text(watermarkText, x, yw, { angle });
+          }
+        }
+        y = 90;
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+      }
+      doc.text(`- ${ing}`, 50, y);
+      y += lineHeight;
+    });
+
+    if (y > pageHeight - 80) {
+      doc.addPage();
+      // Add headers and watermark on new page
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(32);
+      doc.setTextColor(40, 40, 40);
+      doc.text(title, (pageWidth - titleWidth) / 2, 40);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(16);
+      doc.setTextColor(120, 120, 120);
+      doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(230, 230, 230);
+      for (let x = -pageHeight; x < pageWidth + pageHeight; x += stepX) {
+        for (let yw = 0; yw < pageHeight + pageWidth; yw += stepY) {
+          doc.text(watermarkText, x, yw, { angle });
+        }
+      }
+      y = 90;
+    }
+    y += 10;
+    doc.setFontSize(14);
+    doc.text('Steps:', 40, y);
+    y += lineHeight;
+
+    meal.steps?.forEach((step, i) => {
+      if (y > pageHeight - 80) {
+        doc.addPage();
+        // Title/subheader/watermark for new page
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(32);
+        doc.setTextColor(40, 40, 40);
+        doc.text(title, (pageWidth - titleWidth) / 2, 40);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(16);
+        doc.setTextColor(120, 120, 120);
+        doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(230, 230, 230);
+        for (let x = -pageHeight; x < pageWidth + pageHeight; x += stepX) {
+          for (let yw = 0; yw < pageHeight + pageWidth; yw += stepY) {
+            doc.text(watermarkText, x, yw, { angle });
+          }
+        }
+
+        y = 90;
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+      }
+      doc.setFontSize(12);
+      doc.text(`${i + 1}. ${step}`, 50, y);
+      y += lineHeight;
+    });
+
+    // Save PDF
+    doc.save(`${meal.name.replace(/\s+/g, '_')}_ZingMeal.pdf`);
   };
+
 
   if (loading) {
     return (
@@ -221,10 +358,10 @@ function MealDetailsContent() {
 
         <Separator />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-          <Stat 
-            icon={getCurrencyIcon()} 
-            value={formatPrice(getMealPriceInCurrency(meal), selectedCurrency)} 
-            label="Price" 
+          <Stat
+            icon={getCurrencyIcon()}
+            value={formatPrice(getMealPriceInCurrency(meal), selectedCurrency)}
+            label="Price"
           />
           {meal.calories && <Stat icon={Flame} value={`${meal.calories} kcal`} label="Calories" />}
           {meal.prepTime && <Stat icon={Clock} value={meal.prepTime} label="Prep Time" />}
