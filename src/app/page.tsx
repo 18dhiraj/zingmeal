@@ -1,13 +1,8 @@
-'use client'
-
 import Image from "next/image";
 import { PopularMeals } from '../components/Homepage/PopularMeals';
 import Link from "next/link";
 import HomeHeader from "@/components/Homepage/HomeHeader";
 import HeroSection from "@/components/Homepage/HeroSection";
-import { useEffect } from "react";
-import { logEvent } from "firebase/analytics";
-import { analytics } from "@/firebase";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
@@ -17,7 +12,7 @@ export default function HomePage() {
             <HomeHeader />
             <section className="relative h-screen w-full -mt-[60px]">
                 <Image
-                    src="/images/hero-meal1.jpg"
+                    src="https://zingmeal.com/images/hero-meal1.jpg"
                     alt="Delicious meals"
                     fill
                     priority
@@ -74,7 +69,7 @@ export default function HomePage() {
 
                     <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden shadow-lg">
                         <Image
-                            src={require("../../public/images/hero-meal.jpg")}
+                            src={"https://zingmeal.com/images/hero-meal.jpg"}
                             alt="Meal planning made easy"
                             fill
                             className="object-cover"
