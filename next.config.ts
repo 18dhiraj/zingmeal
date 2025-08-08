@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/handler',
+        destination: 'https://zingmeal-18.firebaseapp.com/__/auth/handler',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
