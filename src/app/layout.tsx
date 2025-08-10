@@ -10,6 +10,8 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CurrencyDisplay } from '@/components/CurrencyDisplay';
+import CanonicalTag from '@/components/CanonicalTag';
+
 
 export const metadata: Metadata = {
   title: 'ZingMeal - Find meals you like!',
@@ -24,7 +26,6 @@ export default function RootLayout({
   const header = (
     <header className="bg-card shadow-sm sticky top-0 z-40 border-b">
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo / Home Button */}
         <Link href="/" passHref>
           <Button
             variant="ghost"
@@ -35,8 +36,6 @@ export default function RootLayout({
             <span className="hidden sm:inline">ZingMeal</span>
           </Button>
         </Link>
-
-        {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="hidden sm:block">
             <CurrencyDisplay />
@@ -52,9 +51,6 @@ export default function RootLayout({
               <span className="hidden sm:inline">My Favorites</span>
             </Button>
           </Link>
-
-
-          {/* User Section */}
           <UserHeader />
         </div>
       </nav>
@@ -63,11 +59,16 @@ export default function RootLayout({
   );
 
   return (
-    <html lang="en" suppressHydrationWarning>
+     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="canonical" href="https://zingmeal.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
+        <CanonicalTag />
         <GoogleAnalytics />
       </head>
       <body className="font-body antialiased min-h-screen">
