@@ -24,6 +24,7 @@ import type {
     DietaryPreferenceValue,
 } from '@/types';
 import { popularityService } from '@/lib/popularityService';
+import Image from 'next/image'
 
 const parseFilters = (sp: URLSearchParams): MealFilters => ({
     minPrice: Number(sp.get('minPrice') ?? 5),
@@ -194,7 +195,13 @@ export default function MealPageClient() {
                     <ArrowLeft className="h-5 w-5 mr-1" /> Back
                 </Button>
                 <h1 className="text-4xl font-headline font-bold text-primary flex items-center justify-center gap-3">
-                    <ChefHat className="w-10 h-10" /> Meal Suggestion
+                    {/* <ChefHat className="w-10 h-10" /> */}
+                    <Image
+                        src={require('@/assets/logo/logo.png')}
+                        alt='zingmeal-logo'
+                        className='w-8 h-8'
+                    />
+                    Meal Suggestion
                 </h1>
                 <p className="text-lg text-muted-foreground mt-2">
                     Here’s a meal tailored for you!  Not feeling it? Swap it or view details.

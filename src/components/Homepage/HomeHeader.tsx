@@ -7,6 +7,7 @@ import { CurrencyDisplay } from '../CurrencyDisplay';
 import { useRouter } from 'next/navigation';
 import { auth } from "@/firebase";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import Image from 'next/image';
 
 
 const HomeHeader = () => {
@@ -32,7 +33,12 @@ const HomeHeader = () => {
         <header className="sticky top-0 z-50 bg-black/10 backdrop-blur-[1px] text-white px-4 sm:px-6 py-3 shadow-sm">
             <div className="flex flex-wrap justify-between items-center gap-y-2">
                 <div className="flex items-center gap-2">
-                    <ChefHat className="w-6 h-6 text-white" />
+                    {/* <ChefHat className="w-6 h-6 text-white" /> */}
+                    <Image
+                        src={require('@/assets/logo/logo.png')}
+                        alt='zingmeal-logo'
+                        className='w-11 h-11'
+                    />
                     <span className="hidden sm:inline text-xl font-semibold tracking-wide">ZingMeal</span>
                 </div>
 

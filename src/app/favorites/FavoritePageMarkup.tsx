@@ -28,6 +28,7 @@ import { MealCard } from "@/components/MealCard";
 import type { SavedMealPlan, Meal, MealFilters } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import Image from 'next/image'
 
 type Props = {
     savedPlans: SavedMealPlan[];
@@ -40,7 +41,7 @@ type Props = {
 // Component to display filters with currency awareness
 const FilterDisplay = ({ filters }: { filters: MealFilters }) => {
     const { formatPrice, selectedCurrency } = useCurrency();
-    
+
     return (
         <div className="flex flex-wrap gap-2 items-center">
             <Badge variant="secondary" className="text-xs py-1 px-2">
@@ -67,7 +68,7 @@ export default function FavoritePageMarkup({
     onRemoveIndividualMeal,
 }: Props) {
     const isEmpty = savedPlans.length === 0 && savedIndividualMeals.length === 0;
-    
+
 
     return (
         <main className="flex-grow container mx-auto px-4 py-8">
@@ -92,7 +93,13 @@ export default function FavoritePageMarkup({
                     </p>
                     <Link href="/" passHref>
                         <Button size="lg">
-                            <ChefHat className="mr-2 h-5 w-5" /> Find New Meals
+                            {/* <ChefHat className="mr-2 h-5 w-5" />  */}
+                            <Image
+                                src={require('@/assets/logo/logo.png')}
+                                alt='zingmeal-logo'
+                                className='w-8 h-8'
+                            />
+                            Find New Meals
                         </Button>
                     </Link>
                 </div>

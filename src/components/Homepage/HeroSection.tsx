@@ -3,6 +3,7 @@
 import React from "react";
 import { ChefHat } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const HeroSection = () => {
 
@@ -11,7 +12,12 @@ const HeroSection = () => {
     return (
         <div className="bg-black/20 backdrop-blur-[1px] border border-white/20 p-8 rounded-2xl max-w-md w-full text-left shadow-xl space-y-6">
             <div className="flex items-center gap-3">
-                <ChefHat className="w-8 h-8 text-white" />
+                {/* <ChefHat className="w-8 h-8 text-white" /> */}
+                <Image
+                    src={require('@/assets/logo/logo.png')}
+                    alt='zingmeal-logo'
+                    className='w-12 h-12'
+                />
                 <h1 className="text-3xl font-semibold text-white">Find Your Perfect Meal</h1>
             </div>
             <p className="text-white/80 text-sm leading-relaxed">

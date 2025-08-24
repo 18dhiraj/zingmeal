@@ -11,6 +11,7 @@ import { CurrencyProvider } from '@/contexts/CurrencyContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CurrencyDisplay } from '@/components/CurrencyDisplay';
 import CanonicalTag from '@/components/CanonicalTag';
+import Image from 'next/image';
 
 
 export const metadata: Metadata = {
@@ -32,7 +33,14 @@ export default function RootLayout({
             size="sm"
             className="text-xl font-bold text-primary hover:bg-transparent px-2 sm:px-3 flex items-center gap-2"
           >
-            <ChefHat className="h-6 w-6" />
+            {/* <ChefHat className="h-6 w-6" /> */}
+            <Image
+              src={'https://wjj0gm4hotsxgybm.public.blob.vercel-storage.com/public/logo-primary.png'}
+              width={150}
+              height={30}
+              alt='zingmeal-logo'
+              className='w-12 h-12'
+            />
             <span className="hidden sm:inline">ZingMeal</span>
           </Button>
         </Link>
@@ -59,7 +67,7 @@ export default function RootLayout({
   );
 
   return (
-     <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="canonical" href="https://zingmeal.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import LoginInfoTip from '@/components/LoginInfo';
+import Image from 'next/image'
 
 const getMealLabel = (index: number, total: number) => {
     if (total === 1) return 'Your Meal Suggestion';
@@ -221,7 +222,14 @@ function MealPlanDisplay() {
 
             <div className="flex flex-col sm:flex-row gap-4">
                 <Button onClick={() => router.push('/')} variant="outline" size="lg">
-                    <ChefHat className="mr-2 h-5 w-5" />
+                    {/* <ChefHat className="mr-2 h-5 w-5" /> */}
+                    <Image
+                        src={'https://wjj0gm4hotsxgybm.public.blob.vercel-storage.com/public/logo-black.png'}
+                        width={150}
+                        height={30}
+                        alt='zingmeal-logo'
+                        className='w-10 h-10'
+                    />
                     Find Another Meal Plan
                 </Button>
 
@@ -244,7 +252,13 @@ export default function MealPlanClient() {
                     <ArrowLeft className="w-5 h-5 mr-1" /> New Search
                 </Button>
                 <h1 className="text-2xl sm:text-3xl font-headline font-bold text-primary flex items-center gap-2">
-                    <ChefHat className="w-7 h-7" /> Your Custom Meal Plan
+                    {/* <ChefHat className="w-7 h-7" /> */}
+                    <Image
+                        src={require('@/assets/logo/logo-primary.png')}
+                        alt='zingmeal-logo'
+                        className='w-12 h-12'
+                    />
+                    Your Custom Meal Plan
                 </h1>
                 <span className="w-24" />
             </div>

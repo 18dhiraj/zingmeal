@@ -426,7 +426,13 @@ function MealDetailsContent() {
 
         <Link href="/" passHref className="block w-full">
           <Button variant="outline" className="w-full mt-6">
-            <ChefHat className="mr-2 h-5 w-5" /> Find Another Meal Plan
+            {/* <ChefHat className="mr-2 h-5 w-5" /> */}
+            <Image
+              src={require('@/assets/logo/logo-black.png')}
+              alt='zingmeal-logo'
+              className='w-8 h-8'
+            />
+            Find Another Meal Plan
           </Button>
         </Link>
       </CardContent>
