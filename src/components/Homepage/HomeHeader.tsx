@@ -37,7 +37,7 @@ const HomeHeader = () => {
                     <Image
                         src={require('@/assets/logo/logo.png')}
                         alt='zingmeal-logo'
-                        className='w-11 h-11'
+                        className='w-9 h-9'
                     />
                     <span className="hidden sm:inline text-xl font-semibold tracking-wide">ZingMeal</span>
                 </div>
