@@ -12,7 +12,7 @@ export default function HomePage() {
             <HomeHeader />
             <section className="relative h-screen w-full -mt-[60px]">
                 <Image
-                    src="https://zingmeal.com/images/hero-meal1.jpg"
+                    src="/images/hero-meal1.jpg"
                     alt="Delicious meals"
                     fill
                     priority
@@ -69,7 +69,7 @@ export default function HomePage() {
 
                     <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden shadow-lg">
                         <Image
-                            src={"https://zingmeal.com/images/hero-meal.jpg"}
+                            src="/images/hero-meal.jpg"
                             alt="Meal planning made easy"
                             fill
                             className="object-cover"

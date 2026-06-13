@@ -165,11 +165,11 @@ function MealDetailsContent() {
     let titleWidth = doc.getTextWidth(title);
     doc.text(title, (pageWidth - titleWidth) / 2, 40);
 
-    // === Subheader ("zingmeal.com") directly below, smaller, lighter ===
+    // === Subheader (dynamic hostname) directly below, smaller, lighter ===
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(16);
     doc.setTextColor(120, 120, 120); // lighter gray
-    let subheader = 'zingmeal.com';
+    let subheader = window.location.hostname;
     let subheaderWidth = doc.getTextWidth(subheader);
     doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
 

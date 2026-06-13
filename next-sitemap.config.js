@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://zingmeal.com',
+  siteUrl: process.env.SITE_URL || 'https://zingmeal.com',
   generateRobotsTxt: true,
   changefreq: 'weekly',
   priority: 0.7,
@@ -8,7 +8,7 @@ module.exports = {
   exclude: ['/admin', '/api/*', '/404', '/500'],
   robotsTxtOptions: {
     additionalSitemaps: [
-      'https://zingmeal.com/sitemap-0.xml',
+      `${process.env.SITE_URL || 'https://zingmeal.com'}/sitemap-0.xml`,
     ],
     policies: [
       {

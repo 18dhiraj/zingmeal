@@ -123,7 +123,7 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(16);
     doc.setTextColor(120, 120, 120); // Light gray
-    const subheader = 'zingmeal.com';
+    const subheader = window.location.hostname;
     const subheaderWidth = doc.getTextWidth(subheader);
     doc.text(subheader, (pageWidth - subheaderWidth) / 2, 60);
 
@@ -152,7 +152,7 @@ export default function WeeklyPlanClient({ allMeals }: Props) {
         const meal = mealsMap[id];
         row.push(
           meal?.name
-            ? { content: meal.name, link: `https://zingmeal.com/meals/${meal?.slug || meal.id}/details` }
+            ? { content: meal.name, link: `${window.location.origin}/meals/${meal?.slug || meal.id}/details` }
             : 'Not Assigned'
         );
       });
